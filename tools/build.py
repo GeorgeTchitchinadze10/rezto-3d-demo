@@ -60,6 +60,17 @@ head = re.sub(r'<title>.*?</title>', '', head, flags=re.S)
 head = head.replace('</head>', '')
 head_extra = '''<title>Khachapuri House, online table reservation | Rezto</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="description" content="See the dish on your own table before you book. Rezto × BetaReal.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://georgetchitchinadze10.github.io/rezto-3d-demo/">
+<meta property="og:title" content="Khachapuri House · Rezto × BetaReal">
+<meta property="og:description" content="See the dish on your own table before you book.">
+<meta property="og:image" content="https://georgetchitchinadze10.github.io/rezto-3d-demo/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rezto × BetaReal">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://georgetchitchinadze10.github.io/rezto-3d-demo/assets/og-image.jpg">
 <link rel="icon" type="image/svg+xml" href="assets/rezto/favicon.svg">
 <link rel="icon" type="image/png" sizes="96x96" href="assets/rezto/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +99,8 @@ body = remove_by_marker(body, 'class="sidebar_overlay', all_=True, required=Fals
 # Partner pill ("By Hilton Garden Inn"), both the mobile and desktop copies.
 body = remove_by_marker(body, 'By Hilton Garden Inn</span>', all_=True)
 
-body = body.replace('src="/images/flags/', 'src="assets/rezto/flags/')
+# Language selector: the demo is English only.
+body = remove_by_marker(body, 'data-sentry-component="LanguageSelector"')
 
 # Venue name.
 body = body.replace('>Andazi<', '>Khachapuri House<')
