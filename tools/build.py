@@ -109,7 +109,7 @@ body = body.replace('>Andazi<', '>Khachapuri House<')
 body = body.replace('06:30 — 00:00', '11:00 — 23:00')
 
 # Address pill.
-body = sub1(r'64a Ilia Chavchavadze Avenue\s+Tbilisi', '12 Rustaveli Avenue  Tbilisi', body)
+body = sub1(r'64a Ilia Chavchavadze Avenue\s+Tbilisi', 'Tsomaia Street 23  Tbilisi', body)
 
 # Restaurant logo (lifted above the 3D stage, which makes its own stacking layer).
 body = sub1(r'<div class="absolute left-0 top-0 cursor-pointer"([^>]*)><img alt="Restaurant Logo"', r'<div id="venue-logo" class="absolute left-0 top-0 cursor-pointer"><img alt="Restaurant Logo"', body)
