@@ -18,7 +18,7 @@ This repo is deliberately separate from BetaReal's production and rebuild repos.
 | Dish | Food & Market's Adjarian khachapuri (`menu_items` 1855): GLB, prebuilt USDZ, thumbnail as poster |
 | Android AR | `ar/xr-engine.js`, `ar/xr.css`, `ar/xr-overlay.html`, copied verbatim from the production menu (`Nikoloz-Chachua/Restaurant-AR`, `cloudflare` @ `fcce5c2`) with Food & Market's AR effects on (`data-fm-motion`): plate guide, drop-in, ripple, shadow, steam. Don't edit them; re-copy from production |
 | iPhone AR | Quick Look with the prebuilt USDZ, launched inside the tap as production does |
-| Ours | `app.js`, `demo.css`, `parts.html`, `ar/shims.js`, the logo, `out.html` |
+| Ours | `app.js`, `demo.css`, `parts.html`, `ar/shims.js`, `out.html`; the venue logo is BetaReal's |
 
 ## What we added
 

@@ -101,7 +101,7 @@ body = sub1(r'64a Ilia Chavchavadze Avenue\s+Tbilisi', '12 Rustaveli Avenue  Tbi
 
 # Restaurant logo (lifted above the 3D stage, which makes its own stacking layer).
 body = sub1(r'<div class="absolute left-0 top-0 cursor-pointer"([^>]*)><img alt="Restaurant Logo"', r'<div id="venue-logo" class="absolute left-0 top-0 cursor-pointer"><img alt="Restaurant Logo"', body)
-body = sub1(r'(<img alt="Restaurant Logo"[^>]*?)src="[^"]*"', r'\1src="assets/khachapuri-house-logo.svg"', body)
+body = sub1(r'(<img alt="Restaurant Logo"[^>]*?)src="[^"]*"', r'\1src="assets/betareal-logo.png"', body)
 
 # Venue photo -> 3D dish (Food & Market's viewer settings).
 hero = '''<div id="dish-stage" class="aspect-[914/558] rounded-[300px] border-[10px] md:border-[15px]" style="border-color:#bfc9ca">
@@ -143,7 +143,11 @@ body = sub1(r'<span class="text-\[13px\] font-\[500\] text-\[#979797\] undefined
 
 # Live statistics tracking pill sits on top of Rezto's bottom bar.
 body = sub1(r'(<div class="border-t border-\[#774EE91A\] bg-white px-6 pb-6 pt-4">)',
-            r'\1<button type="button" id="stats-pill"><span class="live" id="stats-dot"></span>Live statistics tracking<span class="n" id="stats-n">0</span></button>', body)
+            r'\1<button type="button" class="stats-pill" id="stats-pill"><span class="live" id="stats-dot"></span>Live statistics tracking<span class="n" id="stats-n">0</span></button>', body)
+
+# "Demo by BetaReal" under Rezto's Technical Assistance line (mobile bottom bar).
+CREDIT = '<a class="demo-credit" href="https://betareal.ge" target="_blank" rel="noopener"><img src="assets/betareal-mark.png" alt="">Demo by <b>BetaReal</b></a>'
+body = sub1(r'(<a href="mailto:info@rezto.ge"[^>]*>info@rezto.ge</a></div>)', lambda m: m.group(1) + CREDIT, body)
 
 overlay = pathlib.Path(OUT.parent / 'ar' / 'xr-overlay.html').read_text(encoding='utf-8').rstrip()
 # The Reserve button must live inside #xr-overlay: it is the WebXR dom-overlay root.

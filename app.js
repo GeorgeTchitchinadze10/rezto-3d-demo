@@ -132,16 +132,17 @@
     events.push({ t: Date.now(), name: name, data: data || null });
     if (events.length > 300) events = events.slice(-300);
     store('rz_events', events);
-    var dot = $('stats-dot');
-    if (dot) { dot.classList.remove('blink'); void dot.offsetWidth; dot.classList.add('blink'); }
+    document.querySelectorAll('.stats-pill .live').forEach(function (dot) {
+      dot.classList.remove('blink'); void dot.offsetWidth; dot.classList.add('blink');
+    });
     renderStats();
   }
   function trackOnce(name, data) { if (once[name]) return; once[name] = 1; track(name, data); }
   function count(name) { return events.filter(function (e) { return e.name === name; }).length; }
 
   function renderStats() {
-    if (!$('stats-n')) return;
-    $('stats-n').textContent = events.length;
+    if (!$('stats-funnel')) return;
+    document.querySelectorAll('.stats-pill .n').forEach(function (n) { n.textContent = events.length; });
     var top = Math.max(1, count('page_view'));
     $('stats-funnel').innerHTML = FUNNEL.map(function (f) {
       var n = count(f[1]);
@@ -185,7 +186,9 @@
     toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2800);
   }
 
-  $('stats-pill').addEventListener('click', function () { renderStats(); openSheet('stats-sheet'); });
+  document.querySelectorAll('.stats-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () { renderStats(); openSheet('stats-sheet'); });
+  });
   $('stats-reset').addEventListener('click', function () {
     events = []; once = {}; store('rz_events', events); renderStats();
   });
@@ -411,6 +414,15 @@
     wrap.classList.remove('opacity-50');
     timeBox.classList.remove('!cursor-not-allowed');
   }
+
+  // Float the "Number of Guests" label above the caret and the number, like Rezto's other fields.
+  var guestsWrap = guestsInput.parentElement;
+  function floatGuestsLabel() {
+    guestsWrap.classList.toggle('demo-float', document.activeElement === guestsInput || !!guestsInput.value);
+  }
+  guestsInput.addEventListener('focus', floatGuestsLabel);
+  guestsInput.addEventListener('blur', floatGuestsLabel);
+  guestsInput.addEventListener('input', floatGuestsLabel);
 
   guestsInput.addEventListener('input', function () {
     form.guests = guestsInput.value;
