@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="100" fill="#fff"/>
+  <path d="M30 92c14-34 42-52 70-52s56 18 70 52c-10 26-38 42-70 42s-60-16-70-42z" fill="#d99a44"/>
+  <path d="M60 90c10-18 24-27 40-27s30 9 40 27c-9 14-24 22-40 22s-31-8-40-22z" fill="#fff1c2"/>
+  <circle cx="100" cy="88" r="13" fill="#f4ad16"/>
+  <text x="100" y="166" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="19" letter-spacing="0.5" fill="#3a2a17">KHACHAPURI</text>
+</svg>

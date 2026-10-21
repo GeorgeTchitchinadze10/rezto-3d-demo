@@ -1,62 +1,75 @@
 # Rezto 3D demo
 
-A concept demo for Rezto's founder: a Rezto-style restaurant booking page where the hero photo
-is replaced by a 3D dish with a big **See it on your table** button. It belongs to the BetaReal ×
-Rezto test partnership. The restaurant (Ember House) is fictional and **no real booking is
-made**. The page is hidden from search engines.
+Rezto's restaurant booking page (mobile, English) with the venue photo replaced by a 3D dish
+and a **See it on your table** button. It's for the BetaReal × Rezto pilot and is seen only by
+BetaReal and Rezto. The restaurant (Khachapuri House) is fictional and no real booking is made.
+The page is hidden from search engines.
 
 Live: https://georgetchitchinadze10.github.io/rezto-3d-demo/
 
 This repo is deliberately separate from BetaReal's production and rebuild repos.
 
-## What it shows
+## What's whose
 
-| Feature | How |
+| Part | Source |
 |---|---|
-| 3D dish in the hero | `model-viewer` 3.4.0, burger model from BetaReal's rights-clean R2 set |
-| AR on iPhone (Safari/Chrome) | AR Quick Look via a persistent `<a rel="ar">`, with a **Reserve a table** button inside AR (`callToAction`). Tapping it scrolls to the booking form |
-| AR on Android (Chrome) | Scene Viewer intent, true size (`resizable=false`), with a `link` back to the page (`?from=ar&reserve=1`) |
-| iPhone + Instagram | `out.html` / `out-en.html`: meta refresh to `instagram://extbrowser/` opens the real browser on `?ar=1` |
-| iPhone + Facebook | A sheet with the manual steps (••• → Open in browser) plus Copy link. No working scheme is known |
-| Android in-app | Chrome intent back to the page with `?ar=1` |
-| Desktop | QR code to open it on a phone |
-| Pre-order −10% | Toggle on the dish card, carried into the booking summary |
-| Share | `navigator.share`, or copy the link. Shared links carry `?from=share` |
-| Live tracking | The pill above **Next** opens a funnel plus an event log. Events are kept in this browser only (`localStorage`); there is no backend |
-| Languages | Georgian by default, EN toggle (`?lang=en`) |
+| Page markup, CSS, fonts, flags | Rezto's live page (`rezto.ge/en/reservation/andazi`), as Chrome renders it on a phone. Their scripts and pop-ups are removed |
+| 3D view | `model-viewer` 3.4.0 with Food & Market's modal settings and the dish's saved camera view (`item_view_1855` = `0 60 105`) |
+| Dish | Food & Market's Adjarian khachapuri (`menu_items` 1855): GLB, prebuilt USDZ, thumbnail as poster |
+| Android AR | `ar/xr-engine.js`, `ar/xr.css`, `ar/xr-overlay.html`, copied verbatim from the production menu (`Nikoloz-Chachua/Restaurant-AR`, `cloudflare` @ `fcce5c2`) with Food & Market's AR effects on (`data-fm-motion`): plate guide, drop-in, ripple, shadow, steam. Don't edit them; re-copy from production |
+| iPhone AR | Quick Look with the prebuilt USDZ, launched inside the tap as production does |
+| Ours | `app.js`, `demo.css`, `parts.html`, `ar/shims.js`, the logo, `out.html` |
 
-UTM parameters (`utm_source`, `utm_campaign`, …) show up as the session's source in the
-tracking panel.
+## What we added
+
+- **See it on your table** under the oval, so it never covers the dish.
+- **Reserve a table inside AR.** On iPhone it's Quick Look's `callToAction`; tapping it
+  scrolls to the booking form. On Android it's a button in the WebXR overlay, shown once the
+  dish is placed.
+- **Getting out of in-app browsers**:
+  - iPhone + Instagram: `out.html`, meta refresh to `instagram://extbrowser/`;
+  - iPhone + Facebook: "Open in browser" steps;
+  - Android in-app: Chrome intent with `?ar=1`.
+- **Live statistics tracking**: the pill above **Next** opens a funnel and an event log.
+  Events are kept in this browser only (`localStorage`); there's no backend. UTM parameters
+  show as the session source.
+- **Working booking fields**: native pickers over Rezto's cards. **Next** shows a summary.
+- **Share icon**: the native share sheet. Shared links carry `?from=share`.
+- **Desktop**: the AR button shows a QR code.
 
 ## Events
 
-`page_view`, `model_loaded`, `model_rotate`, `ar_tap`, `ar_open`, `ar_reserve_tap`,
-`escape_offered`, `escape_tap`, `escape_manual`, `arrived_from_app`, `arrived_from_share`,
-`arrived_from_ar`, `ar_unsupported`, `share_tap`, `share_done`, `link_copied`, `preorder_add`,
-`preorder_remove`, `booking_started`, `booking_incomplete`, `booking_next`, `qr_shown`
+- **3D:** `page_view`, `model_loaded`, `model_rotate`
+- **AR:** `ar_tap`, `ar_open`, `ar_placed`, `ar_reserve_tap`, `ar_duration`, `ar_fallback`
+- **In-app browsers:** `escape_offered`, `escape_tap`, `escape_manual`, `arrived_from_app`
+- **Sharing:** `arrived_from_share`, `share_tap`, `share_done`, `link_copied`
+- **Booking:** `booking_started`, `booking_incomplete`, `booking_next`
+- **Desktop:** `qr_shown`
 
 ## Phone test checklist
 
 None of the in-app escapes are documented by Meta or Google. Re-check after app updates.
 
-- [ ] iPhone Safari: 3D loads, AR opens, **Reserve a table** shows inside AR, and tapping it
-      logs `ar_reserve_tap` and scrolls to the form
-- [ ] iPhone, link opened inside Instagram: the button jumps to Safari and lands with the
-      "one more tap" banner
-- [ ] iPhone, link opened inside Facebook: the manual-steps sheet appears
-- [ ] Android Chrome: Scene Viewer opens at true size, and its link returns to the form
+- [ ] iPhone Safari: the 3D spins, AR opens, **Reserve a table** shows inside AR, and tapping
+      it scrolls to the form
+- [ ] Android Chrome: F&M's AR (scan guide, plate circle, drop-in, steam), then **Reserve a
+      table** once placed
+- [ ] iPhone, link opened inside Instagram: jumps to Safari, then one more tap
+- [ ] iPhone, link opened inside Facebook: the "Open in browser" steps appear
 - [ ] Android, link opened inside Instagram/Facebook: Chrome opens on the same page
-- [ ] Share from the phone: the friend's link opens in 3D and logs `arrived_from_share`
+- [ ] Share from the phone: the link opens on the dish
 
-## Moving it
+## Rebuilding `index.html`
 
-`out.html` and `out-en.html` hardcode the live URL inside their meta refresh (it has to be
-declarative to fire in Instagram). Update both if the demo moves to another domain.
-
-## Run locally
+`tools/build.py` turns a capture of Rezto's rendered page into `index.html`. It strips their
+scripts and pop-ups, swaps in the venue, the 3D stage and the button, then appends
+`ar/xr-overlay.html` and `parts.html`. Capture with headless Chrome at phone size:
 
 ```bash
-py -3 -m http.server 8791 --bind 127.0.0.1
+chrome --headless=new --window-size=390,844 --user-agent="<iPhone Safari UA>" \
+  --virtual-time-budget=15000 --dump-dom https://rezto.ge/en/reservation/andazi > tools/dom-en.html
+py -3 tools/build.py index.html
 ```
 
-AR needs a real phone and HTTPS, so test AR on the live link.
+`out.html` hardcodes the live URL inside its meta refresh (it has to be declarative to fire in
+Instagram). Update it if the demo moves to another domain.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ka">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,21 +7,21 @@
 <!-- Instagram on iPhone: Meta's own scheme opens the phone's default browser.
      It only fires from a declarative meta refresh (a scripted redirect is dropped),
      which is why this is a separate static page. Update the URL if the demo moves. -->
-<meta http-equiv="refresh" content="0;url=instagram://extbrowser/?url=https%3A%2F%2Fgeorgetchitchinadze10.github.io%2Frezto-3d-demo%2F%3Far%3D1%26from%3Dinstagram%26lang%3Dka">
-<title>იხსნება ბრაუზერი…</title>
+<meta http-equiv="refresh" content="0;url=instagram://extbrowser/?url=https%3A%2F%2Fgeorgetchitchinadze10.github.io%2Frezto-3d-demo%2F%3Far%3D1%26from%3Dinstagram">
+<title>Opening your browser…</title>
 <style>
   body { margin: 0; min-height: 100vh; display: grid; place-content: center; gap: 14px; padding: 24px;
-         text-align: center; font: 15px/1.45 system-ui, -apple-system, sans-serif; background: #f4f2ee; color: #1b1a17; }
+         text-align: center; font: 15px/1.45 system-ui, -apple-system, sans-serif; background: #fff; color: #171717; }
   p { margin: 0; }
-  #m { color: #6f6a62; }
+  #m { color: #7C7C7C; }
   #m[hidden] { display: none; }
-  a { color: inherit; font-weight: 600; }
+  a { color: #2CBA72; font-weight: 700; }
 </style>
 </head>
 <body>
-<p>იხსნება ბრაუზერი…</p>
-<p id="m" hidden>თუ არაფერი მოხდა: დააჭირე ••• ზედა კუთხეში, შემდეგ „Open in browser“.</p>
-<p><a href="./?lang=ka">კერძზე დაბრუნება</a></p>
+<p>Opening your browser…</p>
+<p id="m" hidden>If nothing happened: tap ••• in the top corner, then “Open in browser”.</p>
+<p><a href="./">Back to the dish</a></p>
 <script>setTimeout(function () { document.getElementById('m').hidden = false; }, 1500);</script>
 </body>
 </html>

@@ -1,0 +1,234 @@
+/* Production WebXR overlay styles, copied verbatim from Nikoloz-Chachua/Restaurant-AR
+   (cloudflare branch, commit fcce5c2), index.html lines 1663-1893. */
+
+        /* ── WebXR overlay ── */
+        #xr-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 51;
+            pointer-events: none;
+        }
+        #xr-gesture-layer {
+            display: none;
+            position: absolute;
+            inset: 0;
+            pointer-events: all;
+            z-index: 1;
+        }
+        #xr-place-hint {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    background: rgba(0,0,0,0.65);
+    padding: 10px 20px;
+    border-radius: 20px;
+    white-space: normal;
+    text-align: center;
+    width: 80%;
+    max-width: 320px;
+}
+        /* Food & Market test copy: animated "above the table, then tilt toward you" guide
+           shown while ARCore is still looking for a surface (see _updateScanHint). */
+        #xr-scan-guide {
+            display: none;
+            position: absolute;
+            bottom: 196px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            padding: 10px 10px 4px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.55);
+            pointer-events: none;
+        }
+        html[data-fm-motion] #xr-scan-guide.show { display: block; }
+        #xr-scan-guide .sg-tap, #xr-scan-guide[data-step="tap"] .sg-scan { display: none; }
+        #xr-scan-guide[data-step="tap"] .sg-tap { display: block; }
+        #xr-scan-guide .sg-finger, #xr-scan-guide .sg-ripple {
+            transform-box: view-box;
+            transform-origin: 100px 58px;
+        }
+        #xr-scan-guide .sg-finger { animation: sg-finger 1.6s ease-in-out infinite; }
+        #xr-scan-guide .sg-ripple { animation: sg-ripple 1.6s ease-out infinite; }
+        @keyframes sg-finger {
+            0%   { translate: 22px -18px; opacity: 0; }
+            15%  { opacity: 1; }
+            45%  { translate: 0 0; scale: 1; }
+            55%  { translate: 0 2px; scale: 0.92; }
+            65%  { translate: 0 0; scale: 1; }
+            88%  { translate: 22px -18px; opacity: 1; }
+            100% { translate: 22px -18px; opacity: 0; }
+        }
+        @keyframes sg-ripple {
+            0%, 52% { scale: 0.5; opacity: 0; }
+            56%     { scale: 0.6; opacity: 0.9; }
+            100%    { scale: 1.6; opacity: 0; }
+        }
+        #xr-scan-guide svg { display: block; width: 100%; height: auto; overflow: visible; }
+        #xr-scan-guide .sg-arm {
+            transform-box: view-box;
+            transform-origin: 100px 108px;
+            animation: sg-arc 3.6s ease-in-out infinite;
+        }
+        #xr-scan-guide .sg-cone { animation: sg-cone 3.6s ease-in-out infinite; }
+        #xr-scan-guide .sg-plate { animation: sg-plate 3.6s ease-in-out infinite; }
+        @keyframes sg-arc {
+            0%   { rotate: 0deg;   opacity: 0; }
+            6%   { rotate: 0deg;   opacity: 1; }
+            16%  { rotate: 0deg; }
+            68%  { rotate: -50deg; }
+            88%  { rotate: -50deg; opacity: 1; }
+            100% { rotate: -50deg; opacity: 0; }
+        }
+        @keyframes sg-cone {
+            0%, 16%  { opacity: 0.18; }
+            40%      { opacity: 0.32; }
+            68%, 88% { opacity: 0.45; }
+            100%     { opacity: 0; }
+        }
+        @keyframes sg-plate {
+            0%, 64%  { fill: rgba(255,255,255,0.25); }
+            72%, 90% { fill: rgba(255,255,255,0.95); }
+            100%     { fill: rgba(255,255,255,0.25); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #xr-scan-guide .sg-arm, #xr-scan-guide .sg-cone, #xr-scan-guide .sg-plate,
+            #xr-scan-guide .sg-finger, #xr-scan-guide .sg-ripple { animation: none; }
+            #xr-scan-guide .sg-arm { rotate: -30deg; }
+        }
+        #xr-nav-row {
+            display: none;
+            position: absolute;
+            z-index: 2;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: all;
+            align-items: center;
+            gap: 16px;
+            background: rgba(0,0,0,0.65);
+            padding: 8px 20px;
+            border-radius: 30px;
+        }
+        #xr-nav-row button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.35);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #xr-move-hint {
+            display: none;
+            position: absolute;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            white-space: normal;
+            text-align: center;
+            max-width: 80%;
+        }
+        #xr-exit, #xr-carousel-toggle, #xr-label-toggle, #xr-place-again, #xr-hide-ui {
+            pointer-events: all;
+            position: absolute;
+            z-index: 2;
+            background: rgba(0,0,0,0.65);
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        #xr-exit             { top: 18px; right: 18px; }
+        #xr-place-again      { top: 62px; right: 18px; display: none; }
+        #xr-hide-ui          { top: 18px; left: 18px; display: block; transition: opacity 0.25s; }
+        #xr-carousel-toggle  { top: 62px; left: 18px; display: none; }
+        html[data-fm-motion] #xr-carousel-toggle { display: none !important; }
+        #xr-label-toggle     { top: 106px; left: 18px; display: none; }
+        /* No carousel toggle for Food & Market — close the gap under Hide UI */
+        html[data-fm-motion] #xr-label-toggle { top: 62px; }
+        #xr-hide-ui.ui-hidden { opacity: 0.35; }
+        #xr-add-btn {
+            display: none;
+            pointer-events: all;
+            position: absolute;
+            z-index: 2;
+            bottom: 55px;
+            right: 18px;
+            background: rgba(0,0,0,0.45);
+            color: rgba(255,255,255,0.55);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        }
+        #xr-add-btn.visible   { display: flex; }
+        #xr-add-btn.in-basket { background: rgba(240,192,64,0.92); color: #0d0d0d; border-color: transparent; }
+        #xr-hint-step {
+            font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+            color: rgba(255,255,255,.5); margin-bottom: 3px;
+        }
+        #xr-hint-main { font-size: 14px; color: #fff; }
+        #xr-scale-gauge {
+            display: none;
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.65);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            pointer-events: none;
+            min-width: 130px;
+            text-align: center;
+        }
+        #xr-scale-track {
+            height: 4px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 5px;
+        }
+        #xr-scale-fill {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            background: #f0c040;
+            border-radius: 2px;
+        }
+        #xr-scale-mark {
+            position: absolute;
+            top: -3px;
+            width: 2px;
+            height: 10px;
+            background: rgba(255,255,255,0.55);
+            border-radius: 1px;
+            left: calc(53.7% - 1px);
+        }
+        #xr-scale-pct {
+            font-family: 'Nunito', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+

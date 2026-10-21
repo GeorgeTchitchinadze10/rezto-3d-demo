@@ -1,0 +1,58 @@
+    <div id="xr-overlay">
+        <div id="xr-gesture-layer"></div>
+        <div id="xr-scan-guide" aria-hidden="true">
+            <svg class="sg-tap" viewBox="0 0 200 140">
+                <ellipse cx="100" cy="58" rx="46" ry="14" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="3"/>
+                <ellipse class="sg-ripple" cx="100" cy="58" rx="30" ry="9" fill="none" stroke="#fff" stroke-width="2.5"/>
+                <g class="sg-finger">
+                    <g transform="rotate(-24 100 58)" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1.5">
+                        <rect x="92" y="56" width="16" height="44" rx="8"/>
+                        <rect x="104" y="80" width="14" height="30" rx="7"/>
+                        <rect x="114" y="84" width="13" height="27" rx="6.5"/>
+                        <rect x="84" y="86" width="44" height="40" rx="14"/>
+                        <rect x="76" y="88" width="13" height="26" rx="6.5" transform="rotate(-30 82 100)"/>
+                    </g>
+                </g>
+            </svg>
+            <svg class="sg-scan" viewBox="0 0 200 140">
+                <path d="M100 22 A86 86 0 0 0 34.1 52.7" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-dasharray="4 5"/>
+                <path d="M35.4 43.4 L34.1 52.7 L43 49.8" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="30" y1="112" x2="170" y2="112" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                <line x1="46" y1="112" x2="46" y2="136" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                <line x1="154" y1="112" x2="154" y2="136" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                <ellipse class="sg-plate" cx="100" cy="107" rx="18" ry="3.5" fill="rgba(255,255,255,0.25)"/>
+                <clipPath id="sg-above-table"><rect x="0" y="0" width="200" height="109"/></clipPath>
+                <g clip-path="url(#sg-above-table)">
+                    <g class="sg-arm"><polygon class="sg-cone" points="100,32 72,128 128,128" fill="#fff" opacity="0.2"/></g>
+                </g>
+                <g class="sg-arm">
+                    <rect x="80" y="24" width="40" height="8" rx="3" fill="#fff"/>
+                    <circle cx="100" cy="32" r="1.8" fill="#222"/>
+                </g>
+            </svg>
+        </div>
+        <div id="xr-place-hint">
+            <div id="xr-hint-step"></div>
+            <div id="xr-hint-main"></div>
+        </div>
+        <div id="xr-nav-row">
+            <button id="xr-prev">&#10094;</button>
+            <button id="xr-next">&#10095;</button>
+        </div>
+        <div id="xr-move-hint">Drag to move &middot; Twist two fingers to rotate</div>
+        <button id="xr-exit">Exit AR</button>
+        <button id="xr-place-again"></button>
+        <button id="xr-carousel-toggle"></button>
+        <button id="xr-label-toggle"></button>
+        <button id="xr-hide-ui">HIDE UI</button>
+        <div id="xr-scale-gauge">
+            <div id="xr-scale-track">
+                <div id="xr-scale-fill"></div>
+                <div id="xr-scale-mark"></div>
+            </div>
+            <span id="xr-scale-pct">100%</span>
+        </div>
+        <button id="xr-add-btn" aria-label="Add to basket">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </button>
+    </div>

@@ -1,0 +1,49 @@
+
+<!-- Live statistics tracking -->
+<div class="demo-scrim" id="stats-sheet"><div class="demo-sheet">
+  <h2 class="demo-sheet-title">Live statistics tracking</h2>
+  <p class="demo-sheet-text">Every action on this page, as it happens.</p>
+  <div class="demo-funnel" id="stats-funnel"></div>
+  <div class="demo-log" id="stats-log"></div>
+  <p class="demo-meta" id="stats-meta"></p>
+  <div class="demo-row">
+    <button type="button" class="demo-btn-outline" id="stats-reset">Reset</button>
+    <button type="button" class="demo-btn" data-close>Close</button>
+  </div>
+</div></div>
+
+<!-- Facebook (and other) in-app browsers on iPhone -->
+<div class="demo-scrim" id="escape-sheet"><div class="demo-sheet">
+  <h2 class="demo-sheet-title">Open in your browser</h2>
+  <p class="demo-sheet-text">This app’s browser can’t put the dish on your table. Tap <b>•••</b> in the top corner, then <b>Open in browser</b>.</p>
+  <div class="demo-row">
+    <button type="button" class="demo-btn" id="escape-copy">Copy link</button>
+    <button type="button" class="demo-btn-outline" data-close>Close</button>
+  </div>
+</div></div>
+
+<!-- Desktop -->
+<div class="demo-scrim" id="qr-sheet"><div class="demo-sheet">
+  <h2 class="demo-sheet-title">Open it on your phone</h2>
+  <p class="demo-sheet-text">Scan with your phone camera to see the dish on your table.</p>
+  <div class="demo-qr" id="qr-box"></div>
+  <div class="demo-row"><button type="button" class="demo-btn" data-close>Close</button></div>
+</div></div>
+
+<!-- Next -->
+<div class="demo-scrim" id="next-sheet"><div class="demo-sheet">
+  <h2 class="demo-sheet-title">Reservation details</h2>
+  <div class="demo-summary" id="next-summary"></div>
+  <div class="demo-row"><button type="button" class="demo-btn" data-close>Close</button></div>
+</div></div>
+
+<div class="demo-toast" id="demo-toast"></div>
+
+<!-- iPhone AR. Quick Look needs an <a rel="ar"> holding an <img>, and it must stay in
+     the DOM so the "Reserve a table" tap inside AR comes back (WebKit bug 245959). -->
+<a id="ql-launcher" rel="ar" href="#" aria-hidden="true" tabindex="-1"><img alt=""></a>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
+<script src="ar/shims.js"></script>
+<script src="ar/xr-engine.js"></script>
+<script src="app.js"></script>
