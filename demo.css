@@ -123,3 +123,36 @@
 /* Rezto shows the venue logo and the address pill over the photo; keep them over the 3D. */
 #venue-logo { z-index: 3; }
 .image-container .relative > .absolute { z-index: 3; }
+
+/* Desktop: Rezto lays the venue photo full-width behind the reservation panel. A photo can
+   be partly covered; a 3D dish can't, so the dish and the panel get their own space. */
+@media (min-width: 768px) {
+  nav button.whitespace-nowrap.rounded-\[64px\] { display: none; } /* "Open in App" is mobile-only on Rezto */
+  .reservation-container > .image-container {
+    position: static !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin-bottom: 0;
+  }
+  .reservation-container > .form-container { margin-right: 0 !important; flex: none; }
+}
+@media (min-width: 768px) and (max-width: 1099px) {
+  .reservation-container {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 40px;
+    padding-top: 32px;
+  }
+  #dish-stage { width: min(640px, calc(100vw - 64px)); }
+}
+@media (min-width: 1100px) {
+  .reservation-container {
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 56px;
+    padding: 0 32px;
+  }
+  .reservation-container > .image-container { flex: none; width: auto !important; }
+  #dish-stage { width: min(640px, calc(100vw - 472px - 56px - 64px)); }
+}
