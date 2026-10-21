@@ -133,6 +133,10 @@
     height: auto !important;
     padding: 0 !important;
     margin-bottom: 0;
+    /* Rezto's !z-[-1] keeps the photo behind the panel. Once this is a flex item that
+       z-index applies and the whole column sinks under the page, so the 3D dish
+       stops receiving the mouse. */
+    z-index: 1 !important;
   }
   .reservation-container > .form-container { margin-right: 0 !important; flex: none; }
 }
