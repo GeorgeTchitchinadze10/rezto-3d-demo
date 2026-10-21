@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Ember House · 3D demo</title>
+<meta name="description" content="Concept demo: a 3D dish on a restaurant booking page. BetaReal × Rezto. Not a real booking page.">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="https://pub-3c68559de18f4aee94d127e180937bdd.r2.dev/burger_poster.webp">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+  :root {
+    --green: #2fbf71;
+    --green-dark: #23a35f;
+    --green-pale: #a9e3c3;
+    --ink: #1d1f1e;
+    --muted: #8d938f;
+    --field: #f2f3f2;
+    --line: #e6e8e6;
+    --bg: #ffffff;
+    --page: #eef0ee;
+    --hero-a: #f7efe4;
+    --hero-b: #e8dccb;
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font: 15px/1.4 "Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  button, select, input { font: inherit; color: inherit; }
+  .app {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--bg);
+    padding-bottom: 170px;
+    position: relative;
+  }
+
+  /* Demo strip: this is not Rezto's real page */
+  .demo-strip {
+    background: #1d1f1e;
+    color: #f4f4f1;
+    font-size: 12px;
+    text-align: center;
+    padding: 7px 16px;
+    letter-spacing: .2px;
+  }
+  .demo-strip b { color: var(--green-pale); font-weight: 600; }
+
+  /* Header */
+  .top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px 6px;
+  }
+  .wordmark {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; letter-spacing: 1.5px; font-size: 15px;
+  }
+  .wordmark .mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    border: 2px solid var(--ink);
+    display: grid; place-items: center; font-size: 13px;
+  }
+  .wordmark small {
+    font-weight: 600; letter-spacing: .4px; font-size: 10px;
+    background: var(--field); color: var(--muted);
+    padding: 2px 7px; border-radius: 99px;
+  }
+  .top-right { display: flex; align-items: center; gap: 8px; }
+  .pill-green {
+    background: var(--green); color: #fff; border: 0; border-radius: 99px;
+    padding: 8px 14px; font-weight: 600; font-size: 13px;
+  }
+  .lang {
+    border: 1px solid var(--line); background: #fff; border-radius: 99px;
+    padding: 7px 11px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Venue row */
+  .venue {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px 12px;
+  }
+  .venue h1 { font-size: 19px; margin: 0; font-weight: 700; flex: 1; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: #fff;
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .partner {
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); border-radius: 99px;
+    padding: 5px 10px 5px 5px; font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .partner i {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff;
+    display: grid; place-items: center; font-style: normal; font-size: 9px; font-weight: 700;
+  }
+
+  /* Hero with the 3D dish */
+  .hero {
+    position: relative; margin: 0 12px;
+    border-radius: 34px; overflow: hidden;
+    aspect-ratio: 4 / 3.6;
+    background: radial-gradient(120% 90% at 50% 35%, var(--hero-a) 0%, var(--hero-b) 100%);
+    box-shadow: 0 1px 0 rgba(0,0,0,.04) inset;
+  }
+  .hero model-viewer {
+    width: 100%; height: 100%;
+    --poster-color: transparent;
+    background: transparent;
+  }
+  .hero .logo {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: #fff; display: grid; place-items: center;
+    font-weight: 700; font-size: 15px; letter-spacing: .5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  }
+  .hero .chip {
+    position: absolute; top: 18px; right: 14px; z-index: 2;
+    background: rgba(255,255,255,.88); backdrop-filter: blur(6px);
+    border-radius: 99px; padding: 6px 11px; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px; pointer-events: none;
+  }
+  .hero .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .ar-btn {
+    position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 2;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: var(--green); color: #fff; text-decoration: none;
+    border-radius: 99px; padding: 15px 18px;
+    font-weight: 700; font-size: 16px;
+    box-shadow: 0 8px 24px rgba(35,163,95,.35);
+    cursor: pointer;
+  }
+  .ar-btn:active { transform: scale(.98); background: var(--green-dark); }
+  .ar-btn.pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 8px 24px rgba(35,163,95,.35), 0 0 0 0 rgba(47,191,113,.55); }
+    50% { box-shadow: 0 8px 24px rgba(35,163,95,.35), 0 0 0 12px rgba(47,191,113,0); }
+  }
+  .address {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 13px; padding: 10px 20px 0;
+  }
+
+  /* Banner shown after arriving from Instagram/Facebook */
+  .notice {
+    margin: 12px 12px 0; padding: 12px 14px; border-radius: 16px;
+    background: #e9f8f0; color: #17643b; font-size: 14px; font-weight: 600;
+    display: none;
+  }
+  .notice.show { display: block; }
+
+  /* Pre-order this dish */
+  .dish {
+    margin: 16px 12px 0; padding: 14px; border-radius: var(--radius);
+    border: 1px solid var(--line);
+    display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center;
+  }
+  .dish img { width: 64px; height: 64px; border-radius: 14px; object-fit: cover; background: var(--hero-a); }
+  .dish h3 { margin: 0; font-size: 15px; font-weight: 700; }
+  .dish .price { margin-top: 3px; font-size: 14px; }
+  .dish .price s { color: var(--muted); margin-left: 6px; }
+  .dish .badge {
+    display: inline-block; background: #ffe9e4; color: #c2412c;
+    font-size: 11px; font-weight: 700; border-radius: 6px; padding: 1px 6px; margin-left: 6px;
+  }
+  .dish-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .btn-outline, .btn-solid {
+    flex: 1; border-radius: 14px; padding: 11px 10px; font-weight: 600; font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-outline { background: #fff; border: 1px solid var(--line); }
+  .btn-solid { background: var(--ink); color: #fff; border: 1px solid var(--ink); }
+  .btn-solid.added { background: var(--green); border-color: var(--green); }
+
+  /* Booking form */
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 16px 10px;
+  }
+  .section-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .menu-pill {
+    display: flex; align-items: center; gap: 6px;
+    border: 1.5px solid var(--green); color: var(--green-dark); background: #fff;
+    border-radius: 99px; padding: 6px 13px; font-weight: 600; font-size: 13px;
+  }
+  .fields { display: grid; gap: 10px; padding: 0 12px; }
+  .field {
+    position: relative; background: var(--field); border-radius: 18px;
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 62px;
+    transition: box-shadow .2s;
+  }
+  .field.flash { box-shadow: 0 0 0 2px var(--green); }
+  .field.missing { box-shadow: 0 0 0 2px #e0533d; }
+  .field .ic {
+    width: 36px; height: 36px; border-radius: 50%; background: #fff;
+    display: grid; place-items: center; flex: none;
+  }
+  .field .txt { flex: 1; min-width: 0; }
+  .field .label { font-size: 12px; color: var(--muted); }
+  .field .value { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .field .value.placeholder { color: var(--muted); font-weight: 500; }
+  .field select {
+    position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .field.disabled { opacity: .55; }
+  .chev { color: var(--muted); flex: none; }
+
+  .foot { text-align: center; color: var(--muted); font-size: 12px; padding: 22px 16px 0; }
+
+  /* Bottom bar */
+  .bottom {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    pointer-events: none;
+  }
+  .bottom-inner {
+    max-width: 480px; margin: 0 auto; background: linear-gradient(rgba(255,255,255,0), #fff 34%);
+    padding: 22px 12px calc(12px + env(safe-area-inset-bottom));
+    pointer-events: auto;
+  }
+  .next {
+    width: 100%; border: 0; border-radius: 99px; padding: 16px;
+    background: var(--green-pale); color: #fff; font-weight: 700; font-size: 16px;
+    cursor: pointer; transition: background .2s;
+  }
+  .next.ready { background: var(--green); }
+
+  /* Live tracking */
+  .track-pill {
+    margin: 0 0 10px;
+    background: #1d1f1e; color: #fff; border: 0; border-radius: 99px;
+    padding: 8px 12px 8px 10px; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 7px; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  }
+  .track-pill .live { width: 8px; height: 8px; border-radius: 50%; background: #ff5b4a; }
+  .track-pill .live.blink { animation: blink .6s ease-out; }
+  @keyframes blink { 0% { transform: scale(1.8); } 100% { transform: scale(1); } }
+  .track-pill .n { background: rgba(255,255,255,.16); border-radius: 99px; padding: 1px 7px; }
+
+  /* Sheets and modals */
+  .scrim {
+    position: fixed; inset: 0; z-index: 40; background: rgba(20,22,21,.45);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .scrim.show { display: flex; }
+  .sheet {
+    width: 100%; max-width: 480px; max-height: 86vh; overflow: auto;
+    background: #fff; border-radius: 26px 26px 0 0;
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+  }
+  .sheet h3 { margin: 4px 0 6px; font-size: 18px; }
+  .sheet p { margin: 6px 0; color: #4a4f4c; }
+  .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto 10px; }
+  .sheet .row { display: flex; gap: 8px; margin-top: 14px; }
+  .qr { display: grid; place-items: center; padding: 10px 0; }
+  .qr svg { width: 200px; height: 200px; }
+  .summary { background: var(--field); border-radius: 16px; padding: 12px 14px; margin-top: 10px; font-size: 14px; }
+  .summary div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .summary span:first-child { color: var(--muted); }
+  .ok { color: var(--green-dark); font-weight: 700; margin-top: 10px; }
+
+  .funnel { display: grid; gap: 6px; margin: 10px 0 14px; }
+  .funnel div { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+  .funnel .bar { grid-column: 1 / -1; height: 6px; border-radius: 9px; background: var(--field); overflow: hidden; }
+  .funnel .bar i { display: block; height: 100%; background: var(--green); }
+  .log { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #141615; color: #d6efe1; border-radius: 14px; padding: 10px 12px; max-height: 34vh; overflow: auto; }
+  .log div { white-space: pre-wrap; word-break: break-word; }
+  .log .t { color: #7d8781; }
+  .meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(150px + env(safe-area-inset-bottom)); z-index: 60;
+    transform: translateX(-50%) translateY(10px); opacity: 0;
+    background: #1d1f1e; color: #fff; border-radius: 99px; padding: 10px 16px;
+    font-size: 14px; font-weight: 600; transition: all .25s; pointer-events: none;
+    max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Hidden Quick Look launcher: must stay in the DOM so iOS delivers the
+     "Reserve" button tap back to it (WebKit bug 245959). */
+  #ql { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="demo-strip" data-i18n-html="demoStrip"></div>
+
+  <header class="top">
+    <div class="wordmark"><span class="mark">R</span>REZTO <small>DEMO</small></div>
+    <div class="top-right">
+      <button class="pill-green" type="button" id="openApp">Open in App</button>
+      <button class="lang" type="button" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <div class="venue">
+    <h1 data-i18n="venue"></h1>
+    <button class="icon-btn" type="button" id="shareTop" aria-label="Share">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+    </button>
+    <span class="partner"><i>3D</i>BetaReal</span>
+  </div>
+
+  <section class="hero" id="hero">
+    <div class="logo">EH</div>
+    <div class="chip"><span class="dot"></span><span data-i18n="chip"></span></div>
+    <model-viewer id="mv"
+      src="https://pub-3c68559de18f4aee94d127e180937bdd.r2.dev/druidi_balanced_30k_2k.glb"
+      poster="https://pub-3c68559de18f4aee94d127e180937bdd.r2.dev/burger_poster.webp"
+      alt="Double smash burger in 3D"
+      camera-controls disable-zoom disable-pan touch-action="pan-y"
+      auto-rotate auto-rotate-delay="1500" rotation-per-second="22deg"
+      interaction-prompt="none"
+      camera-orbit="25deg 72deg auto" field-of-view="26deg"
+      shadow-intensity="1" shadow-softness="0.9" exposure="1.05"
+      loading="eager" reveal="auto"></model-viewer>
+    <a class="ar-btn" id="arBtn" href="#" role="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8.5 4.9v9.8L12 21.6l-8.5-4.9V6.9z"/><path d="M12 12l8.5-5M12 12v9.6M12 12L3.5 7"/></svg>
+      <span data-i18n="arBtn"></span>
+    </a>
+  </section>
+  <div class="address">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+    <span data-i18n="address"></span>
+  </div>
+
+  <div class="notice" id="notice"></div>
+
+  <section class="dish" id="dish">
+    <img src="https://pub-3c68559de18f4aee94d127e180937bdd.r2.dev/burger_poster.webp" alt="">
+    <div>
+      <h3 data-i18n="dishName"></h3>
+      <div class="price"><b>25.20 ₾</b><s>28.00 ₾</s><span class="badge">−10%</span></div>
+      <div class="meta" data-i18n="preorderHint" style="margin-top:2px"></div>
+    </div>
+    <div class="dish-actions">
+      <button class="btn-solid" type="button" id="preBtn"><span data-i18n="preAdd"></span></button>
+      <button class="btn-outline" type="button" id="shareBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v13"/></svg>
+        <span data-i18n="shareBtn"></span>
+      </button>
+    </div>
+  </section>
+
+  <div class="section-head" id="bookHead">
+    <h2 data-i18n="bookTitle"></h2>
+    <span class="menu-pill">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM8 9h8M8 13h8M8 17h5"/></svg>
+      <span data-i18n="menu"></span>
+    </span>
+  </div>
+
+  <div class="fields" id="fields">
+    <label class="field" data-f="date">
+      <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+      <span class="txt"><div class="label" data-i18n="dateLabel"></div><div class="value placeholder" data-i18n="datePh"></div></span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+      <select id="fDate" aria-label="date"></select>
+    </label>
+    <label class="field disabled" data-f="time">
+      <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      <span class="txt"><div class="label" data-i18n="timeLabel"></div><div class="value placeholder" data-i18n="timePh"></div></span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+      <select id="fTime" aria-label="time" disabled></select>
+    </label>
+    <label class="field" data-f="seat">
+      <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v7M4 12h16v4H4zM6 16v5M18 16v5"/></svg></span>
+      <span class="txt"><div class="label" data-i18n="seatLabel"></div><div class="value placeholder" data-i18n="seatPh"></div></span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+      <select id="fSeat" aria-label="seating"></select>
+    </label>
+    <label class="field" data-f="guests">
+      <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="8.5" r="2.5"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 5.4"/></svg></span>
+      <span class="txt"><div class="label" data-i18n="guestsLabel"></div><div class="value placeholder" data-i18n="guestsPh"></div></span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+      <select id="fGuests" aria-label="guests"></select>
+    </label>
+  </div>
+
+  <div class="foot" data-i18n="foot"></div>
+</div>
+
+<div class="bottom"><div class="bottom-inner">
+  <button class="track-pill" type="button" id="trackPill">
+    <span class="live" id="liveDot"></span><span data-i18n="tracking"></span><span class="n" id="trackN">0</span>
+  </button>
+  <button class="next" type="button" id="nextBtn" data-i18n="next"></button>
+</div></div>
+
+<!-- Live tracking sheet -->
+<div class="scrim" id="trackSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i18n="tracking"></h3>
+  <p data-i18n="trackIntro"></p>
+  <div class="funnel" id="funnel"></div>
+  <div class="log" id="log"></div>
+  <div class="meta" id="sessionMeta"></div>
+  <div class="row">
+    <button class="btn-outline" type="button" id="trackReset" data-i18n="reset"></button>
+    <button class="btn-solid" type="button" data-close data-i18n="close"></button>
+  </div>
+</div></div>
+
+<!-- Open in your browser (Facebook / other in-app browsers on iPhone) -->
+<div class="scrim" id="escapeSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i18n="escTitle"></h3>
+  <p data-i18n="escBody"></p>
+  <div class="row">
+    <button class="btn-solid" type="button" id="copyLink" data-i18n="copyLink"></button>
+    <button class="btn-outline" type="button" data-close data-i18n="close"></button>
+  </div>
+</div></div>
+
+<!-- Desktop: open on your phone -->
+<div class="scrim" id="qrSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i18n="qrTitle"></h3>
+  <p data-i18n="qrBody"></p>
+  <div class="qr" id="qrBox"></div>
+  <div class="row"><button class="btn-solid" type="button" data-close data-i18n="close"></button></div>
+</div></div>
+
+<!-- Next: where Rezto's real flow continues -->
+<div class="scrim" id="doneSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i18n="doneTitle"></h3>
+  <p data-i18n="doneBody"></p>
+  <div class="summary" id="doneSummary"></div>
+  <div class="ok" data-i18n="doneOk"></div>
+  <div class="row"><button class="btn-solid" type="button" data-close data-i18n="close"></button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Quick Look launcher (iPhone AR). The <img> child is required by Safari. -->
+<a id="ql" rel="ar" href="#"><img alt=""></a>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  // ---------- Dish ----------
+  var R2 = 'https://pub-3c68559de18f4aee94d127e180937bdd.r2.dev/';
+  var DISH = {
+    id: 'smash-burger',
+    glb: R2 + 'druidi_balanced_30k_2k.glb',
+    usdz: R2 + 'druidi_balanced_30k_2k.usdz',
+    price: '28.00 ₾',
+    pre: '25.20 ₾'
+  };
+
+  // ---------- Copy ----------
+  var T = {
+    ka: {
+      demoStrip: '<b>კონცეფციის დემო</b> · BetaReal × Rezto · ჯავშანი არ იქმნება',
+      venue: 'ემბერ ჰაუსი',
+      chip: '3D · გადაატრიალე',
+      arBtn: 'ნახე შენს მაგიდაზე',
+      address: 'დემო მისამართი, თბილისი',
+      dishName: 'დაბლ სმეშ ბურგერი',
+      preorderHint: 'შეუკვეთე წინასწარ და დაგხვდება მზად',
+      preAdd: 'წინასწარ შეკვეთა −10%',
+      preAdded: 'დამატებულია ✓',
+      shareBtn: 'გაუგზავნე მეგობრებს',
+      bookTitle: 'ობიექტის დაჯავშნა',
+      menu: 'მენიუ',
+      dateLabel: 'თარიღი', datePh: 'აირჩიე თარიღი',
+      timeLabel: 'მისვლის დრო', timePh: 'აირჩიე დრო',
+      seatLabel: 'ადგილის ტიპი', seatPh: 'აირჩიე ადგილის ტიპი',
+      guestsLabel: 'სტუმრები', guestsPh: 'სტუმრების რაოდენობა',
+      seats: ['დარბაზი', 'ტერასა', 'VIP ოთახი'],
+      guest1: 'სტუმარი', guestN: 'სტუმარი',
+      next: 'შემდეგი',
+      foot: 'დემო · 3D მოდელი: BetaReal',
+      tracking: 'ლაივ ტრეკინგი',
+      trackIntro: 'ყველა მოქმედება ამ გვერდზე, რეალურ დროში. ასე დავინახავთ, რამდენი ჯავშანი მოიტანა 3D-მ.',
+      reset: 'გასუფთავება', close: 'დახურვა',
+      escTitle: 'AR-ისთვის გახსენი ბრაუზერში',
+      escBody: 'Facebook-ის ბრაუზერი კერძს მაგიდაზე ვერ აჩვენებს. დააჭირე ••• ზედა კუთხეში → „Open in browser“. 3D აქაც მუშაობს.',
+      copyLink: 'ბმულის კოპირება',
+      qrTitle: 'გახსენი ტელეფონზე',
+      qrBody: 'დაასკანერე კამერით: კერძი შენს მაგიდაზე გამოჩნდება (iPhone და Android).',
+      doneTitle: 'აქ გრძელდება Rezto-ს ჯავშანი',
+      doneBody: 'ეს დემოა: რეალურ გვერდზე სტუმარი აქედან Rezto-ს ჩვეულებრივ ჯავშანზე გადადის.',
+      doneOk: 'ჯავშნის მცდელობა დაფიქსირდა ✓',
+      sumDate: 'თარიღი', sumTime: 'დრო', sumSeat: 'ადგილი', sumGuests: 'სტუმრები', sumPre: 'წინასწარ შეკვეთა',
+      yes: 'კი', no: 'არა',
+      missing: 'აირჩიე თარიღი, დრო და სტუმრები',
+      copied: 'ბმული დაკოპირდა',
+      afterAr: 'აირჩიე თარიღი და დრო: კერძი უკვე იცი 😉',
+      fromApp: 'კიდევ ერთი შეხება და კერძი შენს მაგიდაზეა ↑',
+      noAr: 'ამ ტელეფონზე AR არ მუშაობს, მაგრამ 3D აქვე შეგიძლია ნახო',
+      qlCta: 'მაგიდის დაჯავშნა',
+      qlSub: 'ემბერ ჰაუსი · 28 ₾ · −10% წინასწარ',
+      shareText: 'ნახე ეს ბურგერი შენს მაგიდაზე 👀 ემბერ ჰაუსი',
+      openApp: 'დემოა: აპლიკაცია არ იხსნება',
+      ev: {
+        page_view: 'გვერდის ნახვა', model_loaded: '3D ჩაიტვირთა', model_rotate: '3D გადაატრიალა',
+        ar_tap: '„ნახე მაგიდაზე“ დააჭირა', ar_open: 'AR გაიხსნა', ar_reserve_tap: 'AR-ში „დაჯავშნა“ დააჭირა',
+        escape_offered: 'ბრაუზერიდან გასვლა შესთავაზა', escape_tap: 'ბრაუზერში გადავიდა', escape_manual: 'ინსტრუქცია ნაჩვენებია',
+        arrived_from_app: 'მოვიდა Instagram/Facebook-დან', arrived_from_share: 'მოვიდა გაზიარებული ბმულით',
+        arrived_from_ar: 'დაბრუნდა AR-დან', ar_unsupported: 'AR არ არის ხელმისაწვდომი',
+        share_tap: 'გაზიარება დააჭირა', share_done: 'გააზიარა', link_copied: 'ბმული დააკოპირა',
+        preorder_add: 'წინასწარ შეკვეთა დაამატა', preorder_remove: 'წინასწარ შეკვეთა მოხსნა',
+        booking_started: 'ჯავშანი დაიწყო', booking_next: 'ჯავშნა: შემდეგი', booking_incomplete: 'ჯავშანი არასრულია',
+        qr_shown: 'QR ნაჩვენებია (კომპიუტერი)'
+      },
+      fn: ['ნახვები', '3D-ს შეეხო', 'AR გახსნა', 'AR-ში დაჯავშნა', 'წინასწარ შეკვეთა', 'ჯავშნა დაიწყო', 'ჯავშნა: შემდეგი'],
+      session: 'სესია', source: 'წყარო', device: 'მოწყობილობა'
+    },
+    en: {
+      demoStrip: '<b>Concept demo</b> · BetaReal × Rezto · no real booking is made',
+      venue: 'Ember House',
+      chip: '3D · drag to rotate',
+      arBtn: 'See it on your table',
+      address: 'Demo address, Tbilisi',
+      dishName: 'Double Smash Burger',
+      preorderHint: 'Pre-order and it’s ready when you arrive',
+      preAdd: 'Pre-order −10%',
+      preAdded: 'Added ✓',
+      shareBtn: 'Send to friends',
+      bookTitle: 'Book a table',
+      menu: 'Menu',
+      dateLabel: 'Date', datePh: 'Choose a date',
+      timeLabel: 'Arrival time', timePh: 'Choose a time',
+      seatLabel: 'Seating', seatPh: 'Choose seating type',
+      guestsLabel: 'Guests', guestsPh: 'Number of guests',
+      seats: ['Indoor', 'Terrace', 'VIP room'],
+      guest1: 'guest', guestN: 'guests',
+      next: 'Next',
+      foot: 'Demo · 3D model by BetaReal',
+      tracking: 'Live tracking',
+      trackIntro: 'Every action on this page, in real time. This is how we’d see how many bookings 3D brought in.',
+      reset: 'Reset', close: 'Close',
+      escTitle: 'Open in your browser for AR',
+      escBody: 'Facebook’s browser can’t put the dish on your table. Tap ••• in the top corner → “Open in browser”. 3D works here too.',
+      copyLink: 'Copy link',
+      qrTitle: 'Open it on your phone',
+      qrBody: 'Scan with your camera and the dish appears on your table (iPhone and Android).',
+      doneTitle: 'Rezto’s booking continues here',
+      doneBody: 'This is a demo: on the real page the guest goes on to Rezto’s normal booking from here.',
+      doneOk: 'Booking intent logged ✓',
+      sumDate: 'Date', sumTime: 'Time', sumSeat: 'Seating', sumGuests: 'Guests', sumPre: 'Pre-order',
+      yes: 'Yes', no: 'No',
+      missing: 'Choose a date, time and guests',
+      copied: 'Link copied',
+      afterAr: 'Pick a date and time: you already know what you’ll order 😉',
+      fromApp: 'One more tap and the dish is on your table ↑',
+      noAr: 'AR isn’t available on this phone, but you can still see it in 3D here',
+      qlCta: 'Reserve a table',
+      qlSub: 'Ember House · 28 ₾ · −10% pre-order',
+      shareText: 'See this burger on your own table 👀 Ember House',
+      openApp: 'Demo: the app doesn’t open',
+      ev: {
+        page_view: 'Page view', model_loaded: '3D loaded', model_rotate: 'Rotated the 3D dish',
+        ar_tap: 'Tapped “See it on your table”', ar_open: 'AR opened', ar_reserve_tap: 'Tapped “Reserve” inside AR',
+        escape_offered: 'Offered to leave the in-app browser', escape_tap: 'Went to the real browser', escape_manual: 'Shown manual steps',
+        arrived_from_app: 'Arrived from Instagram/Facebook', arrived_from_share: 'Arrived via a shared link',
+        arrived_from_ar: 'Came back from AR', ar_unsupported: 'AR not available',
+        share_tap: 'Tapped share', share_done: 'Shared', link_copied: 'Copied the link',
+        preorder_add: 'Added pre-order', preorder_remove: 'Removed pre-order',
+        booking_started: 'Started booking', booking_next: 'Booking: Next', booking_incomplete: 'Booking incomplete',
+        qr_shown: 'QR shown (desktop)'
+      },
+      fn: ['Page views', 'Touched the 3D', 'Opened AR', 'Reserve inside AR', 'Pre-ordered', 'Started booking', 'Booking: Next'],
+      session: 'Session', source: 'Source', device: 'Device'
+    }
+  };
+
+  // ---------- Context ----------
+  var qs = new URLSearchParams(location.search);
+  var ua = navigator.userAgent;
+  var IOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var ANDROID = /Android/i.test(ua);
+  var APP = /Instagram/i.test(ua) ? 'instagram' : (/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua) ? 'facebook' : '');
+  var MOBILE = IOS || ANDROID;
+  var BASE = location.origin + location.pathname;
+
+  function store(k, v) {
+    try {
+      if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null');
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch (e) { return null; }
+  }
+
+  var lang = qs.get('lang') === 'en' ? 'en' : (qs.get('lang') === 'ka' ? 'ka' : (store('rz_lang') || 'ka'));
+  var sid = Math.random().toString(36).slice(2, 8);
+  var source = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].map(function (k) {
+    return qs.get(k) ? k.replace('utm_', '') + '=' + qs.get(k) : '';
+  }).filter(Boolean).join(' · ') || (qs.get('from') ? 'from=' + qs.get('from') : 'direct');
+  var device = (IOS ? 'iPhone' : ANDROID ? 'Android' : 'Desktop') + (APP ? ' · ' + APP + ' in-app' : '');
+
+  function t(k) { return T[lang][k]; }
+
+  // ---------- Live tracking ----------
+  var events = store('rz_events') || [];
+  var once = {};
+
+  function track(name, data) {
+    var e = { t: Date.now(), name: name, sid: sid, data: data || null };
+    events.push(e);
+    if (events.length > 300) events = events.slice(-300);
+    store('rz_events', events);
+    var dot = document.getElementById('liveDot');
+    dot.classList.remove('blink'); void dot.offsetWidth; dot.classList.add('blink');
+    renderTracking();
+  }
+  function trackOnce(name, data) { if (once[name]) return; once[name] = 1; track(name, data); }
+
+  function count(names) {
+    return events.filter(function (e) { return names.indexOf(e.name) >= 0; }).length;
+  }
+
+  function renderTracking() {
+    document.getElementById('trackN').textContent = events.length;
+    var steps = [
+      ['page_view'], ['model_rotate'], ['ar_open'], ['ar_reserve_tap'],
+      ['preorder_add'], ['booking_started'], ['booking_next']
+    ];
+    var top = Math.max(1, count(['page_view']));
+    document.getElementById('funnel').innerHTML = steps.map(function (s, i) {
+      var n = count(s);
+      return '<div><span>' + t('fn')[i] + '</span><b>' + n + '</b><span class="bar"><i style="width:' +
+        Math.min(100, Math.round(n / top * 100)) + '%"></i></span></div>';
+    }).join('');
+    document.getElementById('log').innerHTML = events.slice().reverse().map(function (e) {
+      var d = new Date(e.t);
+      var hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
+      var extra = e.data ? ' ' + Object.keys(e.data).map(function (k) { return k + '=' + e.data[k]; }).join(' ') : '';
+      return '<div><span class="t">' + hh + '</span> ' + (T[lang].ev[e.name] || e.name) + '<span class="t">' + extra + '</span></div>';
+    }).join('');
+    document.getElementById('sessionMeta').textContent =
+      t('session') + ': ' + sid + ' · ' + t('device') + ': ' + device + ' · ' + t('source') + ': ' + source;
+  }
+
+  // ---------- UI helpers ----------
+  function $(id) { return document.getElementById(id); }
+  function openSheet(id) { $(id).classList.add('show'); }
+  function closeSheets() { document.querySelectorAll('.scrim.show').forEach(function (s) { s.classList.remove('show'); }); }
+  document.querySelectorAll('.scrim').forEach(function (s) {
+    s.addEventListener('click', function (e) { if (e.target === s || e.target.hasAttribute('data-close')) closeSheets(); });
+  });
+
+  var toastTimer;
+  function toast(msg) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+
+  // ---------- Language ----------
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var v = T[lang][el.getAttribute('data-i18n')];
+      if (typeof v === 'string') el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      el.innerHTML = T[lang][el.getAttribute('data-i18n-html')];
+    });
+    $('langBtn').textContent = lang === 'ka' ? 'EN' : 'KA';
+    $('preBtn').firstElementChild.textContent = preorder ? t('preAdded') : t('preAdd');
+    fillSelects();
+    setupAR();
+    renderTracking();
+  }
+  $('langBtn').addEventListener('click', function () {
+    lang = lang === 'ka' ? 'en' : 'ka';
+    store('rz_lang', lang);
+    applyLang();
+  });
+  $('openApp').addEventListener('click', function () { toast(t('openApp')); });
+
+  // ---------- Booking form ----------
+  var form = { date: '', time: '', seat: '', guests: '' };
+
+  function fillSelects() {
+    // Georgian names by hand: not every browser ships ka locale data for Intl.
+    var KA_DAYS = ['კვი', 'ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ'];
+    var KA_MONTHS = ['იან', 'თებ', 'მარ', 'აპრ', 'მაი', 'ივნ', 'ივლ', 'აგვ', 'სექ', 'ოქტ', 'ნოე', 'დეკ'];
+    var fmt = lang === 'ka'
+      ? { format: function (d) { return KA_DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + KA_MONTHS[d.getMonth()]; } }
+      : new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    var dates = ['<option value="" disabled' + (form.date ? '' : ' selected') + '>' + t('datePh') + '</option>'];
+    for (var i = 0; i < 14; i++) {
+      var d = new Date(); d.setDate(d.getDate() + i);
+      var v = d.toISOString().slice(0, 10);
+      dates.push('<option value="' + v + '"' + (form.date === v ? ' selected' : '') + '>' + fmt.format(d) + '</option>');
+    }
+    $('fDate').innerHTML = dates.join('');
+
+    var times = ['<option value="" disabled' + (form.time ? '' : ' selected') + '>' + t('timePh') + '</option>'];
+    for (var h = 12; h <= 23; h++) {
+      ['00', '30'].forEach(function (m) {
+        var v = h + ':' + m;
+        times.push('<option' + (form.time === v ? ' selected' : '') + '>' + v + '</option>');
+      });
+    }
+    $('fTime').innerHTML = times.join('');
+
+    $('fSeat').innerHTML = ['<option value="" disabled' + (form.seat ? '' : ' selected') + '>' + t('seatPh') + '</option>']
+      .concat(t('seats').map(function (s, i) {
+        return '<option value="' + i + '"' + (form.seat === String(i) ? ' selected' : '') + '>' + s + '</option>';
+      })).join('');
+
+    var g = ['<option value="" disabled' + (form.guests ? '' : ' selected') + '>' + t('guestsPh') + '</option>'];
+    for (var n = 1; n <= 12; n++) {
+      g.push('<option value="' + n + '"' + (form.guests === String(n) ? ' selected' : '') + '>' + n + ' ' + (n === 1 ? t('guest1') : t('guestN')) + '</option>');
+    }
+    $('fGuests').innerHTML = g.join('');
+    syncFields();
+  }
+
+  function syncFields() {
+    var map = { date: 'fDate', time: 'fTime', seat: 'fSeat', guests: 'fGuests' };
+    Object.keys(map).forEach(function (k) {
+      var sel = $(map[k]);
+      var val = sel.closest('.field').querySelector('.value');
+      if (form[k]) {
+        val.textContent = sel.options[sel.selectedIndex].text;
+        val.classList.remove('placeholder');
+      } else {
+        val.textContent = t(k === 'date' ? 'datePh' : k === 'time' ? 'timePh' : k === 'seat' ? 'seatPh' : 'guestsPh');
+        val.classList.add('placeholder');
+      }
+    });
+    var timeField = $('fTime').closest('.field');
+    $('fTime').disabled = !form.date;
+    timeField.classList.toggle('disabled', !form.date);
+    $('nextBtn').classList.toggle('ready', !!(form.date && form.time && form.guests));
+  }
+
+  [['fDate', 'date'], ['fTime', 'time'], ['fSeat', 'seat'], ['fGuests', 'guests']].forEach(function (p) {
+    $(p[0]).addEventListener('change', function (e) {
+      form[p[1]] = e.target.value;
+      e.target.closest('.field').classList.remove('missing');
+      trackOnce('booking_started', { field: p[1] });
+      syncFields();
+    });
+  });
+
+  $('nextBtn').addEventListener('click', function () {
+    var need = ['date', 'time', 'guests'].filter(function (k) { return !form[k]; });
+    if (need.length) {
+      need.forEach(function (k) {
+        $({ date: 'fDate', time: 'fTime', guests: 'fGuests' }[k]).closest('.field').classList.add('missing');
+      });
+      track('booking_incomplete', { missing: need.join(',') });
+      toast(t('missing'));
+      $('bookHead').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    track('booking_next', { guests: form.guests, preorder: preorder ? 'yes' : 'no' });
+    var rows = [
+      [t('sumDate'), $('fDate').options[$('fDate').selectedIndex].text],
+      [t('sumTime'), form.time],
+      [t('sumSeat'), form.seat ? t('seats')[+form.seat] : '—'],
+      [t('sumGuests'), form.guests],
+      [t('sumPre'), preorder ? t('dishName') + ' · ' + DISH.pre : t('no')]
+    ];
+    $('doneSummary').innerHTML = rows.map(function (r) { return '<div><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join('');
+    openSheet('doneSheet');
+  });
+
+  // ---------- Pre-order ----------
+  var preorder = false;
+  $('preBtn').addEventListener('click', function () {
+    preorder = !preorder;
+    this.classList.toggle('added', preorder);
+    this.firstElementChild.textContent = preorder ? t('preAdded') : t('preAdd');
+    track(preorder ? 'preorder_add' : 'preorder_remove', { dish: DISH.id });
+  });
+
+  // ---------- Share ----------
+  function shareUrl() { return BASE + '?from=share&lang=' + lang; }
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    return Promise.resolve();
+  }
+  function share(where) {
+    track('share_tap', { where: where });
+    var url = shareUrl();
+    if (navigator.share) {
+      navigator.share({ title: t('venue'), text: t('shareText'), url: url })
+        .then(function () { track('share_done', { where: where }); })
+        .catch(function () {});
+    } else {
+      copy(url).then(function () { track('link_copied', { where: where }); toast(t('copied')); });
+    }
+  }
+  $('shareBtn').addEventListener('click', function () { share('dish'); });
+  $('shareTop').addEventListener('click', function () { share('header'); });
+  $('copyLink').addEventListener('click', function () {
+    copy(BASE + '?ar=1&from=' + (APP || 'inapp') + '&lang=' + lang).then(function () {
+      track('link_copied', { where: 'escape' }); toast(t('copied'));
+    });
+  });
+
+  // ---------- 3D model ----------
+  var mv = $('mv');
+  var t0 = performance.now();
+  mv.addEventListener('load', function () { track('model_loaded', { ms: Math.round(performance.now() - t0) }); });
+  mv.addEventListener('camera-change', function (e) {
+    if (e.detail && e.detail.source === 'user-interaction') trackOnce('model_rotate');
+  });
+
+  // ---------- AR ----------
+  // Which path "See it on your table" takes:
+  //   iPhone Safari/Chrome   Quick Look, with a "Reserve a table" button inside AR
+  //   iPhone + Instagram     out.html bounce -> instagram://extbrowser/ (opens the real browser)
+  //   iPhone + Facebook      a sheet with the two manual taps (no scheme is known to work)
+  //   Android Chrome         Scene Viewer, with a "Reserve" link inside AR
+  //   Android in-app         Chrome intent back to this page with ?ar=1
+  //   Desktop                QR code to open it on a phone
+  var ql = $('ql');
+  var arBtn = $('arBtn');
+  var arPath = '';
+
+  function quickLookHref() {
+    var p = new URLSearchParams();
+    p.set('callToAction', t('qlCta'));
+    p.set('checkoutTitle', t('dishName'));
+    p.set('checkoutSubtitle', t('qlSub'));
+    p.set('allowsContentScaling', '0');
+    p.set('canonicalWebPageURL', shareUrl());
+    return DISH.usdz + '#' + p.toString().replace(/\+/g, '%20');
+  }
+
+  function sceneViewerHref() {
+    var p = new URLSearchParams();
+    p.set('file', DISH.glb);
+    p.set('mode', 'ar_preferred');
+    p.set('resizable', 'false');
+    p.set('title', t('dishName') + ' · ' + DISH.price);
+    p.set('link', BASE + '?from=ar&reserve=1&lang=' + lang);
+    var fallback = BASE + '?ar=unsupported&lang=' + lang;
+    return 'intent://arvr.google.com/scene-viewer/1.0?' + p.toString().replace(/\+/g, '%20') +
+      '#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;' +
+      'S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end;';
+  }
+
+  function chromeIntentHref() {
+    var target = new URL(BASE);
+    target.searchParams.set('ar', '1');
+    target.searchParams.set('from', APP);
+    target.searchParams.set('lang', lang);
+    return 'intent://' + target.host + target.pathname + target.search +
+      '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+      encodeURIComponent(target.href) + ';end';
+  }
+
+  function canQuickLook() {
+    var a = document.createElement('a');
+    return !!(a.relList && a.relList.supports && a.relList.supports('ar'));
+  }
+
+  function setupAR() {
+    if (IOS && APP === 'instagram') {
+      arPath = 'escape_instagram';
+      arBtn.href = lang === 'en' ? 'out-en.html' : 'out.html';
+    } else if (IOS && APP) {
+      arPath = 'escape_manual';
+      arBtn.href = '#';
+    } else if (IOS) {
+      arPath = canQuickLook() ? 'quicklook' : 'escape_manual';
+      arBtn.href = '#';
+      ql.href = quickLookHref();
+    } else if (ANDROID && APP) {
+      arPath = 'escape_android';
+      arBtn.href = chromeIntentHref();
+    } else if (ANDROID) {
+      arPath = 'sceneviewer';
+      arBtn.href = sceneViewerHref();
+    } else {
+      arPath = 'qr';
+      arBtn.href = '#';
+    }
+  }
+
+  arBtn.addEventListener('click', function (e) {
+    arBtn.classList.remove('pulse');
+    track('ar_tap', { path: arPath });
+    if (arPath === 'escape_instagram' || arPath === 'escape_android') {
+      track('escape_tap', { app: APP });
+      return; // real link tap: let the browser follow href
+    }
+    if (arPath === 'sceneviewer') {
+      track('ar_open', { via: 'sceneviewer' });
+      return;
+    }
+    e.preventDefault();
+    if (arPath === 'quicklook') {
+      ql.href = quickLookHref();
+      ql.click();
+      track('ar_open', { via: 'quicklook' });
+    } else if (arPath === 'escape_manual') {
+      track('escape_manual', { app: APP || 'webview' });
+      openSheet('escapeSheet');
+    } else {
+      showQR();
+    }
+  });
+
+  // "Reserve a table" tapped inside iPhone AR
+  ql.addEventListener('message', function (e) {
+    if (e.data === '_apple_ar_quicklook_button_tapped') {
+      track('ar_reserve_tap', { via: 'quicklook' });
+      goToBooking();
+    }
+  }, false);
+
+  function goToBooking() {
+    $('bookHead').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var f = $('fDate').closest('.field');
+    f.classList.add('flash');
+    setTimeout(function () { f.classList.remove('flash'); }, 2400);
+    toast(t('afterAr'));
+  }
+
+  function showQR() {
+    track('qr_shown');
+    var box = $('qrBox');
+    box.innerHTML = '';
+    if (window.qrcode) {
+      var q = window.qrcode(0, 'M');
+      q.addData(BASE + '?from=qr&lang=' + lang);
+      q.make();
+      box.innerHTML = q.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
+    } else {
+      box.textContent = BASE;
+    }
+    openSheet('qrSheet');
+  }
+
+  // ---------- Tracking sheet ----------
+  $('trackPill').addEventListener('click', function () { renderTracking(); openSheet('trackSheet'); });
+  $('trackReset').addEventListener('click', function () { events = []; once = {}; store('rz_events', events); renderTracking(); });
+
+  // For checking the AR links from a desktop console.
+  window.__rz = { quickLookHref: quickLookHref, sceneViewerHref: sceneViewerHref, chromeIntentHref: chromeIntentHref };
+
+  // ---------- Start ----------
+  applyLang();
+  track('page_view', { device: device, source: source });
+
+  var from = qs.get('from');
+  if (qs.get('ar') === '1' && from) {
+    track('arrived_from_app', { from: from });
+    var n = $('notice');
+    n.textContent = t('fromApp');
+    n.classList.add('show');
+    arBtn.classList.add('pulse');
+  } else if (from === 'share') {
+    track('arrived_from_share');
+  }
+  if (qs.get('reserve') === '1' && from === 'ar') {
+    track('arrived_from_ar');
+    track('ar_reserve_tap', { via: 'sceneviewer' });
+    setTimeout(goToBooking, 400);
+  }
+  if (qs.get('ar') === 'unsupported') {
+    track('ar_unsupported');
+    toast(t('noAr'));
+  }
+  if (APP && MOBILE) track('escape_offered', { app: APP });
+
+  // Drop the one-shot flags from the address bar so a reload doesn't replay them.
+  if (qs.has('ar') || qs.has('reserve')) {
+    qs.delete('ar'); qs.delete('reserve');
+    var clean = BASE + (qs.toString() ? '?' + qs.toString() : '');
+    try { history.replaceState(null, '', clean); } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>
