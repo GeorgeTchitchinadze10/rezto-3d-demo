@@ -5,7 +5,7 @@ and a **See it on your table** button. It's for the BetaReal × Rezto pilot and 
 BetaReal and Rezto. The restaurant (Khachapuri House) is fictional and no real booking is made.
 The page is hidden from search engines.
 
-Live: https://georgetchitchinadze10.github.io/rezto-3d-demo/
+Live: https://betareal-rezto.pages.dev/
 
 This repo is deliberately separate from BetaReal's production and rebuild repos.
 
