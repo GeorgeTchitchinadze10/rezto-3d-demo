@@ -30,21 +30,9 @@ This repo is deliberately separate from BetaReal's production and rebuild repos.
   - iPhone + Instagram: `out.html`, meta refresh to `instagram://extbrowser/`;
   - iPhone + Facebook: "Open in browser" steps;
   - Android in-app: Chrome intent with `?ar=1`.
-- **Live statistics tracking**: the pill above **Next** opens a funnel and an event log.
-  Events are kept in this browser only (`localStorage`); there's no backend. UTM parameters
-  show as the session source.
 - **Working booking fields**: native pickers over Rezto's cards. **Next** shows a summary.
 - **Share icon**: the native share sheet. Shared links carry `?from=share`.
 - **Desktop**: the AR button shows a QR code.
-
-## Events
-
-- **3D:** `page_view`, `model_loaded`, `model_rotate`
-- **AR:** `ar_tap`, `ar_open`, `ar_placed`, `ar_reserve_tap`, `ar_duration`, `ar_fallback`
-- **In-app browsers:** `escape_offered`, `escape_tap`, `escape_manual`, `arrived_from_app`
-- **Sharing:** `arrived_from_share`, `share_tap`, `share_done`, `link_copied`
-- **Booking:** `booking_started`, `booking_incomplete`, `booking_next`
-- **Desktop:** `qr_shown`
 
 ## Phone test checklist
 

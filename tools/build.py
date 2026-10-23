@@ -154,10 +154,6 @@ body = sub1(r'<span class="text-\[13px\] font-\[500\] text-\[#979797\] undefined
 body = sub1(r'<span class="text-\[13px\] font-\[500\] text-\[#979797\] undefined">Select area type</span>',
             '<span class="text-[13px] font-[500] text-[#979797] undefined">Select area type</span><span data-value="area" class="w-full text-[14px] font-[400] text-black undefined line-clamp-2" hidden></span>', body)
 
-# Live statistics tracking pill sits on top of Rezto's bottom bar.
-body = sub1(r'(<div class="border-t border-\[#774EE91A\] bg-white px-6 pb-6 pt-4">)',
-            r'\1<button type="button" class="stats-pill" id="stats-pill"><span class="live" id="stats-dot"></span>Live statistics tracking<span class="n" id="stats-n">0</span></button>', body)
-
 # "Demo by BetaReal" under Rezto's Technical Assistance line (mobile bottom bar).
 CREDIT = '<a class="demo-credit" href="https://betareal.ge" target="_blank" rel="noopener"><img src="assets/betareal-mark.png" alt="">Demo by <b>BetaReal</b></a>'
 body = sub1(r'(<a href="mailto:info@rezto.ge"[^>]*>info@rezto.ge</a></div>)', lambda m: m.group(1) + CREDIT, body)

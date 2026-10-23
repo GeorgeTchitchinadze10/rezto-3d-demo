@@ -26,15 +26,8 @@
   var BASE = location.origin + location.pathname;
   var APP = /Instagram/i.test(ua) ? 'instagram' : (/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua) ? 'facebook' : '');
   var ANDROID = /Android/i.test(ua);
-  var sid = Math.random().toString(36).slice(2, 8);
 
   function $(id) { return document.getElementById(id); }
-  function store(k, v) {
-    try {
-      if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null');
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch (e) { return null; }
-  }
 
   // Same checks as the production menu (index.html: _looksIOS, _deviceCouldDoAR,
   // _capStillPlausible, detectAR).
@@ -86,85 +79,9 @@
   // tap, and an await before it would lose the gesture.
   if (IOS && _deviceCouldDoAR() && !window.__arCap) window.__arCap = 'arkit';
   else if (!IOS) detectAR();
-  var device = (IOS ? 'iPhone' : ANDROID ? 'Android' : 'Desktop') + (APP ? ' · ' + APP + ' in-app' : '');
-  var source = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].map(function (k) {
-    return qs.get(k) ? k.replace('utm_', '') + '=' + qs.get(k) : '';
-  }).filter(Boolean).join(' · ') || (qs.get('from') ? 'from=' + qs.get('from') : 'direct');
-
-  // ---------- Live statistics tracking ----------
-  var LABELS = {
-    page_view: 'Page view',
-    model_loaded: '3D dish loaded',
-    model_rotate: 'Rotated the 3D dish',
-    ar_tap: 'Tapped “See it on your table”',
-    ar_open: 'AR opened',
-    ar_placed: 'Placed the dish on the table',
-    ar_reserve_tap: 'Tapped “Reserve a table” inside AR',
-    ar_duration: 'Left AR',
-    ar_fallback: 'AR could not start',
-    escape_offered: 'In-app browser detected',
-    escape_tap: 'Sent to the real browser',
-    escape_manual: 'Shown “Open in browser” steps',
-    arrived_from_app: 'Arrived from Instagram/Facebook',
-    arrived_from_share: 'Arrived via a shared link',
-    share_tap: 'Tapped share',
-    share_done: 'Shared',
-    link_copied: 'Copied the link',
-    booking_started: 'Started the reservation',
-    booking_incomplete: 'Tapped Next with fields missing',
-    booking_next: 'Reservation: Next',
-    qr_shown: 'QR shown (desktop)'
-  };
-  var FUNNEL = [
-    ['Page views', 'page_view'],
-    ['Touched the 3D dish', 'model_rotate'],
-    ['Opened AR', 'ar_open'],
-    ['Placed it on the table', 'ar_placed'],
-    ['Reserve tapped inside AR', 'ar_reserve_tap'],
-    ['Started the reservation', 'booking_started'],
-    ['Reservation: Next', 'booking_next']
-  ];
-
-  var events = store('rz_events') || [];
-  var once = {};
-
-  function track(name, data) {
-    events.push({ t: Date.now(), name: name, data: data || null });
-    if (events.length > 300) events = events.slice(-300);
-    store('rz_events', events);
-    document.querySelectorAll('.stats-pill .live').forEach(function (dot) {
-      dot.classList.remove('blink'); void dot.offsetWidth; dot.classList.add('blink');
-    });
-    renderStats();
-  }
-  function trackOnce(name, data) { if (once[name]) return; once[name] = 1; track(name, data); }
-  function count(name) { return events.filter(function (e) { return e.name === name; }).length; }
-
-  function renderStats() {
-    if (!$('stats-funnel')) return;
-    document.querySelectorAll('.stats-pill .n').forEach(function (n) { n.textContent = events.length; });
-    var top = Math.max(1, count('page_view'));
-    $('stats-funnel').innerHTML = FUNNEL.map(function (f) {
-      var n = count(f[1]);
-      return '<div><span>' + f[0] + '</span><b>' + n + '</b><span class="bar"><i style="width:' +
-        Math.min(100, Math.round(n / top * 100)) + '%"></i></span></div>';
-    }).join('');
-    $('stats-log').innerHTML = events.slice().reverse().map(function (e) {
-      var d = new Date(e.t);
-      var hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
-      var extra = e.data ? ' ' + Object.keys(e.data).map(function (k) { return k + '=' + e.data[k]; }).join(' ') : '';
-      return '<div><span class="t">' + hh + '</span> ' + (LABELS[e.name] || e.name) + '<span class="t">' + extra + '</span></div>';
-    }).join('');
-    $('stats-meta').textContent = 'Session ' + sid + ' · ' + device + ' · source: ' + source;
-  }
-
   // The AR engine reports through window.track(name, menuIndex, meta).
-  var arStartedAt = 0;
-  window.track = function (name, idx, meta) {
-    if (name === 'ar_placed') {
-      track('ar_placed');
-      $('xr-reserve-btn').classList.add('visible');
-    }
+  window.track = function (name) {
+    if (name === 'ar_placed') $('xr-reserve-btn').classList.add('visible');
   };
 
   // ---------- Sheets, toast ----------
@@ -186,23 +103,11 @@
     toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2800);
   }
 
-  document.querySelectorAll('.stats-pill').forEach(function (pill) {
-    pill.addEventListener('click', function () { renderStats(); openSheet('stats-sheet'); });
-  });
-  $('stats-reset').addEventListener('click', function () {
-    events = []; once = {}; store('rz_events', events); renderStats();
-  });
-
   // ---------- 3D dish ----------
   var mv = $('dish-viewer');
-  var t0 = performance.now();
   mv.addEventListener('load', function () {
-    track('model_loaded', { ms: Math.round(performance.now() - t0) });
     var btn = $('see-on-table');
     if (!btn.classList.contains('pulse')) btn.classList.add('nudge');
-  });
-  mv.addEventListener('camera-change', function (e) {
-    if (e.detail && e.detail.source === 'user-interaction') trackOnce('model_rotate');
   });
 
   // ---------- Share ----------
@@ -218,18 +123,16 @@
   document.querySelectorAll('[data-testid="ShareOutlinedIcon"]').forEach(function (icon) {
     var btn = icon.parentElement;
     btn.addEventListener('click', function () {
-      track('share_tap');
       if (navigator.share) {
         navigator.share({ title: VENUE, text: 'See the Adjarian khachapuri on your own table', url: shareUrl() })
-          .then(function () { track('share_done'); })
           .catch(function () {});
       } else {
-        copy(shareUrl()).then(function () { track('link_copied'); toast('Link copied'); });
+        copy(shareUrl()).then(function () { toast('Link copied'); });
       }
     });
   });
   $('escape-copy').addEventListener('click', function () {
-    copy(BASE + '?ar=1&from=' + (APP || 'inapp')).then(function () { track('link_copied'); toast('Link copied'); });
+    copy(BASE + '?ar=1&from=' + (APP || 'inapp')).then(function () { toast('Link copied'); });
   });
 
   // ---------- AR ----------
@@ -269,7 +172,6 @@
   // In-app escapes must be real link taps, so the button gets an href there.
   if (APP && IOS && APP === 'instagram') arBtn.setAttribute('href', 'out.html');
   else if (APP && ANDROID) arBtn.setAttribute('href', chromeIntentHref());
-  if (APP && (IOS || ANDROID)) track('escape_offered', { app: APP });
 
   function goToBooking() {
     var form = document.querySelector('form');
@@ -283,7 +185,6 @@
   }
 
   function showQR() {
-    track('qr_shown');
     var box = $('qr-box');
     box.innerHTML = '';
     if (window.qrcode) {
@@ -299,27 +200,24 @@
 
   arBtn.addEventListener('click', async function (e) {
     arBtn.classList.remove('pulse', 'nudge');
-    if (APP && IOS && APP === 'instagram') { track('ar_tap', { path: 'escape_instagram' }); track('escape_tap', { app: APP }); return; }
-    if (APP && ANDROID) { track('ar_tap', { path: 'escape_android' }); track('escape_tap', { app: APP }); return; }
+    // Instagram on iPhone and in-app browsers on Android follow the button's href.
+    if (APP && (ANDROID || (IOS && APP === 'instagram'))) return;
     e.preventDefault();
-    if (APP && IOS) { track('ar_tap', { path: 'escape_manual' }); track('escape_manual', { app: APP }); openSheet('escape-sheet'); return; }
+    if (APP && IOS) { openSheet('escape-sheet'); return; }
     if (arOpening) return;
     arOpening = true;
     setTimeout(function () { arOpening = false; }, 2500);
 
     var cap = window.__arCap || await detectAR();
-    track('ar_tap', { path: cap });
     if (cap === 'arkit') {
       // Prebuilt USDZ straight to Quick Look, inside the tap (production _launchQuickLook).
       ql.href = quickLookHref();
       ql.click();
-      track('ar_open', { via: 'quicklook' });
     } else if (cap === 'webxr' && window.XR) {
       try {
         await window.XR.start(0, MENU);
       } catch (err) {
         console.error('XR start failed:', err);
-        track('ar_fallback', { reason: String(err && err.message || err) });
         toast('Could not start AR. Showing the 3D model instead.');
         arOpening = false;
       }
@@ -331,15 +229,11 @@
 
   // "Reserve a table" inside iPhone AR
   ql.addEventListener('message', function (e) {
-    if (e.data === '_apple_ar_quicklook_button_tapped') {
-      track('ar_reserve_tap', { via: 'quicklook' });
-      goToBooking();
-    }
+    if (e.data === '_apple_ar_quicklook_button_tapped') goToBooking();
   }, false);
 
   // "Reserve a table" inside Android AR
   $('xr-reserve-btn').addEventListener('click', function () {
-    track('ar_reserve_tap', { via: 'webxr' });
     $('xr-exit').click();
     setTimeout(goToBooking, 300);
   });
@@ -350,20 +244,12 @@
   $('xr-place-again').textContent = UI.en.placeAgain;
   $('xr-hide-ui').textContent = UI.en.hideUI;
 
-  document.addEventListener('xr-session-start', function () {
-    arStartedAt = Date.now();
-    track('ar_open', { via: 'webxr' });
-  });
   document.addEventListener('xr-session-end', function (e) {
     arOpening = false;
     $('xr-reserve-btn').classList.remove('visible');
     if (e.detail && e.detail.fallbackIdx != null) {
-      track('ar_fallback', { reason: 'session' });
       toast(e.detail.message || 'Could not start AR. Showing the 3D model instead.');
-    } else if (arStartedAt) {
-      track('ar_duration', { seconds: Math.round((Date.now() - arStartedAt) / 1000) });
     }
-    arStartedAt = 0;
   });
 
   // Decode the model in the background so the first AR tap is instant (production does the same).
@@ -392,7 +278,6 @@
       var val = box.querySelector('[data-value="' + key + '"]');
       if (val) { val.textContent = label; val.hidden = false; }
       box.classList.remove('demo-missing');
-      trackOnce('booking_started', { field: key });
       if (key === 'date') enableTime();
       syncNext();
     });
@@ -432,7 +317,6 @@
 
   guestsInput.addEventListener('input', function () {
     form.guests = guestsInput.value;
-    if (guestsInput.value) trackOnce('booking_started', { field: 'guests' });
     guestsInput.closest('.relative').classList.remove('demo-missing');
     syncNext();
   });
@@ -445,16 +329,14 @@
 
   nextBtns.forEach(function (b) {
     b.addEventListener('click', function () {
-      var missing = [];
-      if (!form.date) { missing.push('date'); dateBox.classList.add('demo-missing'); }
-      if (!form.time) { missing.push('time'); timeBox.classList.add('demo-missing'); }
-      if (!form.guests) { missing.push('guests'); guestsInput.closest('.relative').classList.add('demo-missing'); }
-      if (missing.length) {
-        track('booking_incomplete', { missing: missing.join(',') });
+      var missing = false;
+      if (!form.date) { missing = true; dateBox.classList.add('demo-missing'); }
+      if (!form.time) { missing = true; timeBox.classList.add('demo-missing'); }
+      if (!form.guests) { missing = true; guestsInput.closest('.relative').classList.add('demo-missing'); }
+      if (missing) {
         toast('Choose a date, time and number of guests');
         return;
       }
-      track('booking_next', { guests: form.guests });
       var label = function (sel) { return sel.options[sel.selectedIndex].text; };
       var rows = [
         ['Restaurant', VENUE],
@@ -471,15 +353,11 @@
   });
 
   // ---------- Start ----------
-  renderStats();
-  track('page_view', { device: device, source: source });
-  var from = qs.get('from');
-  if (qs.get('ar') === '1' && from) {
-    track('arrived_from_app', { from: from });
+  // Events from the old statistics panel, on phones that opened an earlier version.
+  try { localStorage.removeItem('rz_events'); } catch (e) {}
+  if (qs.get('ar') === '1' && qs.get('from')) {
     arBtn.classList.add('pulse');
     toast('One more tap and the dish is on your table');
-  } else if (from === 'share') {
-    track('arrived_from_share');
   }
   if (qs.has('ar')) {
     qs.delete('ar');

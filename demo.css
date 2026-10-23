@@ -64,18 +64,6 @@
 .demo-flash { box-shadow: 0 0 0 2px #2CBA72; border-radius: 16px; transition: box-shadow .3s; }
 .demo-missing { box-shadow: 0 0 0 2px #DF3F4C; border-radius: 16px; }
 
-/* Live statistics tracking pill */
-.stats-pill {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  margin: 0 auto 12px; padding: 6px 12px 6px 10px;
-  border: 0; border-radius: 64px; background: #171717; color: #fff;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-}
-.stats-pill .live { width: 8px; height: 8px; border-radius: 50%; background: #DF3F4C; }
-.stats-pill .live.blink { animation: demo-blink .6s ease-out; }
-@keyframes demo-blink { 0% { transform: scale(1.9); } 100% { transform: scale(1); } }
-.stats-pill .n { background: rgba(255,255,255,.18); border-radius: 64px; padding: 0 7px; }
-
 /* Bottom sheets, in Rezto's style */
 .demo-scrim {
   position: fixed; inset: 0; z-index: 120; display: none;
@@ -101,19 +89,6 @@
 .demo-summary { background: #F5F5F5; border-radius: 16px; padding: 12px 16px; font-size: 14px; }
 .demo-summary div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
 .demo-summary span:first-child { color: #7C7C7C; }
-
-.demo-funnel { display: grid; gap: 8px; margin: 6px 0 14px; }
-.demo-funnel div { display: grid; grid-template-columns: 1fr auto; gap: 6px; font-size: 14px; }
-.demo-funnel .bar { grid-column: 1 / -1; height: 6px; border-radius: 9px; background: #F5F5F5; overflow: hidden; }
-.demo-funnel .bar i { display: block; height: 100%; background: #2CBA72; }
-.demo-log {
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  background: #171717; color: #d6efe1; border-radius: 14px; padding: 10px 12px;
-  max-height: 32vh; overflow: auto;
-}
-.demo-log div { white-space: pre-wrap; word-break: break-word; }
-.demo-log .t { color: #7d8781; }
-.demo-meta { font-size: 12px; color: #7C7C7C; margin: 8px 0 0; }
 
 .demo-toast {
   position: fixed; left: 50%; bottom: calc(190px + env(safe-area-inset-bottom)); z-index: 130;
@@ -190,7 +165,7 @@
 .demo-credit img { width: 18px; height: 18px; border-radius: 5px; }
 .demo-credit b { color: #000; font-weight: 600; }
 
-/* Desktop bar: pill + credit in the empty middle of Rezto's sticky header, where it never
+/* Desktop bar: the credit in the empty middle of Rezto's sticky header, where it never
    covers the dish or the panel (Rezto's own bottom bar is md:hidden) */
 .demo-desktop-bar { display: none; }
 @media (min-width: 768px) {
@@ -198,8 +173,7 @@
     display: flex; align-items: center; gap: 16px;
     position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 30;
   }
-  .demo-desktop-bar .stats-pill { margin: 0; }
-  .demo-desktop-bar .demo-credit { margin: 0 8px 0 0; }
+  .demo-desktop-bar .demo-credit { margin: 0; }
 }
 
 /* Number of Guests: float the label up once the field is in use, like Rezto's other fields */
