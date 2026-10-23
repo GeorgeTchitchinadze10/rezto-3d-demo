@@ -103,13 +103,6 @@
     toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2800);
   }
 
-  // ---------- 3D dish ----------
-  var mv = $('dish-viewer');
-  mv.addEventListener('load', function () {
-    var btn = $('see-on-table');
-    if (!btn.classList.contains('pulse')) btn.classList.add('nudge');
-  });
-
   // ---------- Share ----------
   function shareUrl() { return BASE + '?from=share'; }
   function copy(text) {
@@ -199,7 +192,6 @@
   }
 
   arBtn.addEventListener('click', async function (e) {
-    arBtn.classList.remove('pulse', 'nudge');
     // Instagram on iPhone and in-app browsers on Android follow the button's href.
     if (APP && (ANDROID || (IOS && APP === 'instagram'))) return;
     e.preventDefault();
@@ -356,7 +348,6 @@
   // Events from the old statistics panel, on phones that opened an earlier version.
   try { localStorage.removeItem('rz_events'); } catch (e) {}
   if (qs.get('ar') === '1' && qs.get('from')) {
-    arBtn.classList.add('pulse');
     toast('One more tap and the dish is on your table');
   }
   if (qs.has('ar')) {

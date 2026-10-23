@@ -42,15 +42,14 @@
 #see-on-table .ar-arrow { flex: none; transition: transform .2s; }
 #see-on-table:hover .ar-arrow { transform: translateX(3px); }
 #see-on-table:active { transform: scale(.985); }
-/* A few pulses once the dish has loaded; endless after an in-app escape */
-#see-on-table.nudge { animation: demo-pulse 1.6s ease-in-out 3; }
-#see-on-table.pulse { animation: demo-pulse 1.6s ease-in-out infinite; }
+/* Pulses for as long as the page is open */
+#see-on-table { animation: demo-pulse 1.6s ease-in-out infinite; }
 @keyframes demo-pulse {
   0%, 100% { box-shadow: 0 6px 18px rgba(44, 186, 114, .28), 0 0 0 0 rgba(44, 186, 114, .5); }
   50% { box-shadow: 0 6px 18px rgba(44, 186, 114, .28), 0 0 0 12px rgba(44, 186, 114, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  #see-on-table.nudge, #see-on-table.pulse { animation: none; }
+  #see-on-table { animation: none; }
 }
 
 /* Booking fields: native pickers laid over Rezto's field cards */
