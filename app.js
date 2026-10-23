@@ -191,6 +191,20 @@
     openSheet('qr-sheet');
   }
 
+  // While AR is open, stop everything on the page that draws every frame: the spinning
+  // dish is a second WebGL scene competing with AR for the GPU, and the button pulse
+  // repaints. The production menu has neither running behind AR.
+  var mv = $('dish-viewer');
+  function pausePage() {
+    mv.removeAttribute('auto-rotate');
+    document.documentElement.classList.add('ar-active');
+  }
+  function resumePage() {
+    if (!document.documentElement.classList.contains('ar-active')) return;
+    document.documentElement.classList.remove('ar-active');
+    mv.setAttribute('auto-rotate', '');
+  }
+
   arBtn.addEventListener('click', async function (e) {
     // Instagram on iPhone and in-app browsers on Android follow the button's href.
     if (APP && (ANDROID || (IOS && APP === 'instagram'))) return;
@@ -205,13 +219,22 @@
       // Prebuilt USDZ straight to Quick Look, inside the tap (production _launchQuickLook).
       ql.href = quickLookHref();
       ql.click();
+      pausePage();
+      // Quick Look has no close event; the first touch back on the page means it's gone.
+      setTimeout(function () {
+        ['touchstart', 'pointerdown', 'scroll'].forEach(function (type) {
+          window.addEventListener(type, resumePage, { once: true, passive: true });
+        });
+      }, 500);
     } else if (cap === 'webxr' && window.XR) {
+      pausePage();
       try {
         await window.XR.start(0, MENU);
       } catch (err) {
         console.error('XR start failed:', err);
         toast('Could not start AR. Showing the 3D model instead.');
         arOpening = false;
+        resumePage();
       }
     } else {
       arOpening = false;
@@ -221,7 +244,7 @@
 
   // "Reserve a table" inside iPhone AR
   ql.addEventListener('message', function (e) {
-    if (e.data === '_apple_ar_quicklook_button_tapped') goToBooking();
+    if (e.data === '_apple_ar_quicklook_button_tapped') { resumePage(); goToBooking(); }
   }, false);
 
   // "Reserve a table" inside Android AR
@@ -238,6 +261,7 @@
 
   document.addEventListener('xr-session-end', function (e) {
     arOpening = false;
+    resumePage();
     $('xr-reserve-btn').classList.remove('visible');
     if (e.detail && e.detail.fallbackIdx != null) {
       toast(e.detail.message || 'Could not start AR. Showing the 3D model instead.');
