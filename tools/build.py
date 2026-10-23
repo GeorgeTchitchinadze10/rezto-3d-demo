@@ -134,9 +134,10 @@ body = sub1(r'<img alt="Andazi image 1"[^>]*>', hero, body)
 
 # "See it on your table" goes under the oval, so it never covers the dish.
 # An <a>, not a <button>: inside Instagram/Facebook the escape has to be a real link tap.
-ar_btn = '''<a href="#" role="button" id="see-on-table" class="primary_button flex w-full !py-[18px]">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8.5 4.9v9.8L12 21.6l-8.5-4.9V6.9z"/><path d="M12 12l8.5-5M12 12v9.6M12 12L3.5 7"/></svg>
-<span>See it on your table</span>
+ar_btn = '''<a href="#" role="button" id="see-on-table" class="primary_button flex w-full">
+<span class="ar-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M12 6.5l4.5 2.6v5.2L12 16.9l-4.5-2.6V9.1z"/><path d="M12 11.7l4.5-2.6M12 11.7v5.2M12 11.7L7.5 9.1"/></svg></span>
+<span class="ar-text"><span class="ar-title">See it on your table</span><span class="ar-sub" id="see-on-table-sub">Opens your camera · dish in 3D</span></span>
+<svg class="ar-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
 </a>'''
 i = body.find('id="dish-stage"')
 rel = body.rfind('<div class="relative">', 0, i)

@@ -196,7 +196,11 @@
   // ---------- 3D dish ----------
   var mv = $('dish-viewer');
   var t0 = performance.now();
-  mv.addEventListener('load', function () { track('model_loaded', { ms: Math.round(performance.now() - t0) }); });
+  mv.addEventListener('load', function () {
+    track('model_loaded', { ms: Math.round(performance.now() - t0) });
+    var btn = $('see-on-table');
+    if (!btn.classList.contains('pulse')) btn.classList.add('nudge');
+  });
   mv.addEventListener('camera-change', function (e) {
     if (e.detail && e.detail.source === 'user-interaction') trackOnce('model_rotate');
   });
@@ -241,6 +245,8 @@
   var arBtn = $('see-on-table');
   var ql = $('ql-launcher');
   var arOpening = false;
+  // On a computer the button opens a QR code, so say that instead.
+  if (!IOS && !ANDROID) $('see-on-table-sub').textContent = 'Scan a QR code to try it on your phone';
 
   function quickLookHref() {
     var p = new URLSearchParams();
@@ -292,7 +298,7 @@
   }
 
   arBtn.addEventListener('click', async function (e) {
-    arBtn.classList.remove('pulse');
+    arBtn.classList.remove('pulse', 'nudge');
     if (APP && IOS && APP === 'instagram') { track('ar_tap', { path: 'escape_instagram' }); track('escape_tap', { app: APP }); return; }
     if (APP && ANDROID) { track('ar_tap', { path: 'escape_android' }); track('escape_tap', { app: APP }); return; }
     e.preventDefault();

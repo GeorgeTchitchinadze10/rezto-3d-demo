@@ -20,16 +20,37 @@
 
 #see-on-table {
   margin-top: 14px;
+  min-height: 68px;
+  padding: 10px 18px 10px 10px;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 12px;
   text-decoration: none;
-  font-weight: 700;
+  text-transform: none;
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(44, 186, 114, .28);
 }
+#see-on-table .ar-icon {
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #fff; color: #2cba72;
+}
+#see-on-table .ar-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#see-on-table .ar-title { font-size: 17px; line-height: 1.15; font-weight: 800; }
+#see-on-table .ar-sub { font-size: 12.5px; line-height: 1.25; font-weight: 600; opacity: .9; }
+#see-on-table .ar-arrow { flex: none; transition: transform .2s; }
+#see-on-table:hover .ar-arrow { transform: translateX(3px); }
+#see-on-table:active { transform: scale(.985); }
+/* A few pulses once the dish has loaded; endless after an in-app escape */
+#see-on-table.nudge { animation: demo-pulse 1.6s ease-in-out 3; }
 #see-on-table.pulse { animation: demo-pulse 1.6s ease-in-out infinite; }
 @keyframes demo-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(44, 186, 114, .5); }
-  50% { box-shadow: 0 0 0 12px rgba(44, 186, 114, 0); }
+  0%, 100% { box-shadow: 0 6px 18px rgba(44, 186, 114, .28), 0 0 0 0 rgba(44, 186, 114, .5); }
+  50% { box-shadow: 0 6px 18px rgba(44, 186, 114, .28), 0 0 0 12px rgba(44, 186, 114, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #see-on-table.nudge, #see-on-table.pulse { animation: none; }
 }
 
 /* Booking fields: native pickers laid over Rezto's field cards */
