@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>AR inside the app test</title><style>body{margin:0;padding:24px 18px 40px;font:16px/1.45 -apple-system,system-ui,sans-serif;background:#0B0F1A;color:#EEF2FA}h1{font-size:22px;margin:0 0 6px}p{margin:8px 0;color:#AAB4C8}.env{font:13px/1.4 ui-monospace,Menlo,monospace;background:#151C2C;border-radius:10px;padding:10px 12px;color:#CFE0FF;word-break:break-word}a.t,button.t{display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:16px;border-radius:12px;border:0;background:#2F6BFF;color:#fff;font:600 17px/1.3 -apple-system,system-ui,sans-serif;text-align:left;text-decoration:none}a.t small,button.t small{display:block;font-weight:400;font-size:13px;opacity:.85;margin-top:4px}.big{font-size:44px;margin:10px 0}video{width:100%;border-radius:12px;background:#000;display:block}.res{font:600 16px/1.4 -apple-system,system-ui,sans-serif;background:#151C2C;border-radius:10px;padding:10px 12px;margin:8px 0;white-space:pre-line}.cam{position:relative}.cam img{position:absolute;left:50%;bottom:12%;width:55%;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 18px 18px rgba(0,0,0,.55))}a.q img{width:44px;height:44px;border-radius:8px;vertical-align:middle;margin-right:10px}</style></head><body>
+<h1>AR inside the app test</h1>
+<div class="env" id="env"></div>
+<div class="res" id="diag">Checking what this browser supports…</div>
+<p>Open this from the <b>Instagram DM</b> and from the <b>Facebook "Only me" post</b>. For each button, note: did AR open (dish on your table)? Was there a popup first?</p>
+
+<h2>1 · Android: Google's AR viewer</h2>
+<a class="t" href="intent://arvr.google.com/scene-viewer/1.0?file=https%3A%2F%2Fpub-b253d60df14c4c1f94bada002fa59596.r2.dev%2Ffood-market-main%2F1789294491888_khachapuri_enhanced_half_size.glb&mode=ar_preferred&title=Adjarian%20Khachapuri#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https%3A%2F%2Fbetareal-rezto.pages.dev%2Fig-test%2Flanded%3Ft%3DS1x;end">S1 · Google AR (via Google app)<small>Opens Google's viewer straight into AR</small></a>
+<a class="t" href="intent://arvr.google.com/scene-viewer/1.0?file=https%3A%2F%2Fpub-b253d60df14c4c1f94bada002fa59596.r2.dev%2Ffood-market-main%2F1789294491888_khachapuri_enhanced_half_size.glb&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https%3A%2F%2Fbetareal-rezto.pages.dev%2Fig-test%2Flanded%3Ft%3DS2x;end">S2 · Google AR (via ARCore)<small>Same, through the AR services app</small></a>
+
+<h2>2 · iPhone: Apple's AR viewer</h2>
+<a class="t q" rel="ar" href="https://pub-b253d60df14c4c1f94bada002fa59596.r2.dev/food-market-main/1789294515939_khachapuri_enhanced_half_size.usdz"><img src="../assets/betareal-mark.png" alt="">Q1 · Apple AR link<small>The standard Apple AR link</small></a>
+<a class="t" href="https://pub-b253d60df14c4c1f94bada002fa59596.r2.dev/food-market-main/1789294515939_khachapuri_enhanced_half_size.usdz">Q2 · Plain link to the 3D file<small>Does it open in AR or download?</small></a>
+<button class="t" id="q3">Q3 · Apple AR by script<small>The way 3D viewers usually open it</small></button>
+
+<h2>3 · Both: camera inside the page</h2>
+<button class="t" id="cam">C1 · Turn on camera here<small>If the camera shows, AR inside the app is possible</small></button>
+<div class="cam" id="camBox" hidden><video id="v" playsinline muted autoplay></video><img src="../assets/betareal-mark.png" alt="" id="dish"></div>
+<div class="res" id="camRes" hidden></div>
+<script>(function(){var u=navigator.userAgent,w=/Instagram/i.test(u)?"Instagram in-app browser":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(u)?"Facebook in-app browser":/CriOS/.test(u)?"Chrome":/iPhone|iPad/.test(u)?"Safari":/Android/.test(u)?"Android browser":"Desktop browser";document.getElementById("env").textContent="You are in: "+w;window.__where=w})()</script>
+<script>
+(function(){
+  var d=document.getElementById('diag'),a=document.createElement('a'),lines=[];
+  lines.push('Apple AR link supported: '+((a.relList&&a.relList.supports&&a.relList.supports('ar'))?'YES':'no'));
+  lines.push('Camera API present: '+((navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)?'YES':'no'));
+  if(navigator.xr&&navigator.xr.isSessionSupported){
+    navigator.xr.isSessionSupported('immersive-ar').then(function(ok){lines.push('WebXR AR supported: '+(ok?'YES':'no'));d.textContent=lines.join('\n')}).catch(function(){lines.push('WebXR AR supported: error');d.textContent=lines.join('\n')});
+  } else lines.push('WebXR AR supported: no');
+  d.textContent=lines.join('\n');
+
+  document.getElementById('q3').onclick=function(){
+    var x=document.createElement('a');x.rel='ar';x.href='https://pub-b253d60df14c4c1f94bada002fa59596.r2.dev/food-market-main/1789294515939_khachapuri_enhanced_half_size.usdz';x.appendChild(document.createElement('img'));document.body.appendChild(x);x.click();
+  };
+
+  document.getElementById('cam').onclick=function(){
+    var r=document.getElementById('camRes');r.hidden=false;
+    if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){r.textContent='❌ Camera API not available in this browser';return}
+    r.textContent='Asking for camera…';
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(function(s){
+      var v=document.getElementById('v');v.srcObject=s;document.getElementById('camBox').hidden=false;
+      r.textContent='✅ Camera works inside this browser';
+    }).catch(function(e){r.textContent='❌ Camera blocked: '+(e&&e.name||e)});
+  };
+})();
+</script>
+</body></html>
