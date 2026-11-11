@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Dish on your table (camera prototype)</title>
+<style>
+  :root{--blue:#2F6BFF;--ink:#F4F6FB;--mute:#AAB4C8;--bg:#0B0F1A}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
+  #v,#c{position:fixed;inset:0;width:100%;height:100%}
+  #v{object-fit:cover;background:#000}
+  #c{touch-action:none}
+  .hide{display:none!important}
+
+  /* start screen */
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 20px calc(28px + env(safe-area-inset-bottom));
+         background:radial-gradient(120% 70% at 50% 30%,#16244A 0%,#0B0F1A 60%)}
+  #start .dish{flex:1;display:grid;place-items:center}
+  #start .dish img{width:min(78vw,340px);border-radius:18px;box-shadow:0 24px 50px rgba(0,0,0,.55)}
+  #start h1{font-size:26px;line-height:1.15;margin:0 0 8px}
+  #start p{color:var(--mute);margin:0 0 20px}
+  .btn{display:block;width:100%;border:0;border-radius:14px;padding:17px 18px;font:600 17px/1.2 -apple-system,system-ui,sans-serif;color:#fff;background:var(--blue);text-align:center;text-decoration:none}
+  .btn small{display:block;font-weight:400;font-size:13px;opacity:.85;margin-top:3px}
+  #load{color:var(--mute);font-size:13px;text-align:center;margin-top:10px;min-height:18px}
+
+  /* AR overlay */
+  #ui{position:fixed;inset:0;pointer-events:none}
+  #ui > *{pointer-events:auto}
+  .top{position:absolute;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:10px;align-items:center}
+  .ic{width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+  .hint{flex:1;text-align:center;font-size:13px;color:#fff;background:rgba(0,0,0,.45);border-radius:20px;padding:9px 12px;backdrop-filter:blur(6px);transition:opacity .4s}
+  .bottom{position:absolute;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom))}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .link{color:#fff;font-size:13px;opacity:.9;background:rgba(0,0,0,.45);padding:8px 12px;border-radius:16px;text-decoration:none;border:0}
+  #err{position:fixed;left:16px;right:16px;top:40%;background:#1b2238;border-radius:14px;padding:16px;text-align:center}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<video id="v" playsinline muted autoplay class="hide"></video>
+<canvas id="c" class="hide"></canvas>
+
+<section id="start">
+  <div class="dish"><img src="https://pub-b253d60df14c4c1f94bada002fa59596.r2.dev/food-market-main/1788464911301_Copy_of_________________.webp" alt="" onerror="this.style.display='none'"></div>
+  <h1>See the Adjarian khachapuri on your table</h1>
+  <p>Point your camera at a table. No app, nothing to install.</p>
+  <button class="btn" id="go">See it on your table<small>Allow the camera when asked</small></button>
+  <div id="load">Loading the dish…</div>
+</section>
+
+<div id="ui" class="hide">
+  <div class="top">
+    <button class="ic" id="close" aria-label="Close">✕</button>
+    <div class="hint" id="hint">Point at your table · drag to move · pinch to resize</div>
+    <button class="ic" id="recenter" aria-label="Put the dish in front of me">⟲</button>
+  </div>
+  <div class="bottom">
+    <a class="btn" id="reserve" href="../?from=cam">Reserve a table</a>
+    <div class="row">
+      <a class="link" id="full" href="#">Open full AR ↗</a>
+      <button class="link" id="real">Real size</button>
+    </div>
+  </div>
+</div>
+<div id="err" class="hide"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const GLB = 'https://pub-b253d60df14c4c1f94bada002fa59596.r2.dev/food-market-main/1789294491888_khachapuri_enhanced_half_size.glb';
+const $ = id => document.getElementById(id);
+const ua = navigator.userAgent;
+const IOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IG = /Instagram/i.test(ua), FB = /FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua);
+
+// "Open full AR" = the escapes that tested OK on 2026-11-11
+const DEMO_AR = 'https://betareal-rezto.pages.dev/?ar=1&from=cam';
+let full = DEMO_AR;
+if (IOS && IG) full = 'instagram://extbrowser/?url=' + encodeURIComponent(DEMO_AR);
+else if (IOS && FB) full = 'x-safari-' + DEMO_AR;
+else if (!IOS && (IG || FB)) full = 'intent://betareal-rezto.pages.dev/?ar=1&from=cam#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(DEMO_AR) + ';end';
+$('full').href = full;
+
+// ---------- three.js scene ----------
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(0.3, 1, 0.4); scene.add(sun);
+
+// Phone held ~45 cm above the table top (y = 0 is the table).
+const CAM_H = 0.45;
+const cam = new THREE.PerspectiveCamera(65, 1, 0.01, 20);
+cam.position.set(0, CAM_H, 0);
+cam.rotation.set(-0.75, 0, 0, 'YXZ');            // used until/unless the gyro reports
+
+const dish = new THREE.Group(); scene.add(dish);
+// soft contact shadow
+const sc = document.createElement('canvas'); sc.width = sc.height = 128;
+const g2 = sc.getContext('2d'); const grd = g2.createRadialGradient(64, 64, 4, 64, 64, 62);
+grd.addColorStop(0, 'rgba(0,0,0,.55)'); grd.addColorStop(.6, 'rgba(0,0,0,.25)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+g2.fillStyle = grd; g2.fillRect(0, 0, 128, 128);
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.42),
+  new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.001; dish.add(shadow);
+
+let model = null, userScale = 1;
+const loadMsg = $('load');
+new GLTFLoader().load(GLB, gltf => {
+  model = gltf.scene; dish.add(model); loadMsg.textContent = 'Ready';
+}, e => { if (e.total) loadMsg.textContent = 'Loading the dish… ' + Math.round(e.loaded / e.total * 100) + '%'; },
+() => { loadMsg.textContent = 'Could not load the dish'; });
+
+// ---------- camera feed + field of view ----------
+const video = $('v');
+const TAN_HALF_DIAG = Math.tan(THREE.MathUtils.degToRad(79.5 / 2)); // ~26 mm-equivalent main camera
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  cam.aspect = w / h;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if (vw && vh) {
+    const long = Math.max(vw, vh), short = Math.min(vw, vh), a = long / short;
+    const tanLong = TAN_HALF_DIAG * a / Math.sqrt(1 + a * a);
+    // portrait: the video's long side is vertical; object-fit: cover may crop it
+    const vidH = h > w ? long : short, vidW = h > w ? short : long;
+    const s = Math.max(w / vidW, h / vidH);
+    const visibleH = h / s;                            // in video pixels
+    const tanLongPx = tanLong / (Math.max(vidW, vidH) / 2);
+    const tanV = tanLongPx * visibleH / 2;
+    cam.fov = THREE.MathUtils.radToDeg(2 * Math.atan(tanV));
+  }
+  cam.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+video.addEventListener('loadedmetadata', resize);
+
+// ---------- gyro (3DoF): the dish stays put while the phone turns ----------
+let gyro = false, haveOri = false;
+const qTarget = new THREE.Quaternion(), euler = new THREE.Euler(), q0 = new THREE.Quaternion();
+const q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), zee = new THREE.Vector3(0, 0, 1);
+function onOri(e) {
+  if (e.alpha == null && e.beta == null) return;
+  const d = THREE.MathUtils.DEG2RAD;
+  const orient = (screen.orientation && screen.orientation.angle || window.orientation || 0) * d;
+  euler.set((e.beta || 0) * d, (e.alpha || 0) * d, -(e.gamma || 0) * d, 'YXZ');
+  qTarget.setFromEuler(euler); qTarget.multiply(q1); qTarget.multiply(q0.setFromAxisAngle(zee, -orient));
+  if (!haveOri) { cam.quaternion.copy(qTarget); haveOri = true; }
+  gyro = true;
+}
+
+// ---------- placement ----------
+const ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+function screenToTable(x, y) {
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1), cam);
+  const p = ray.ray.intersectPlane(plane, hit);
+  if (!p || p.distanceTo(cam.position) > 1.6) return null;
+  return p.clone();
+}
+function placeInFront() {
+  cam.updateMatrixWorld();
+  const p = screenToTable(innerWidth / 2, innerHeight * 0.62);
+  if (p) { dish.position.set(p.x, 0, p.z); return; }
+  const f = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion); f.y = 0;
+  if (f.lengthSq() < 1e-4) f.set(0, 0, -1);
+  f.normalize().multiplyScalar(0.5); dish.position.set(f.x, 0, f.z);
+}
+
+// ---------- gestures: drag = move, pinch = size, twist = turn ----------
+const touches = new Map(); let grabOff = null, pinch0 = null;
+function pts() { return [...touches.values()]; }
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId); touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  hideHint();
+  if (touches.size === 1) { const p = screenToTable(e.clientX, e.clientY); grabOff = p ? dish.position.clone().sub(p) : null; }
+  if (touches.size === 2) { const [a, b] = pts(); pinch0 = { d: Math.hypot(a.x - b.x, a.y - b.y), ang: Math.atan2(b.y - a.y, b.x - a.x), s: userScale, r: dish.rotation.y }; }
+});
+canvas.addEventListener('pointermove', e => {
+  if (!touches.has(e.pointerId)) return;
+  touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (touches.size === 1 && grabOff) {
+    const p = screenToTable(e.clientX, e.clientY); if (p) dish.position.copy(p.add(grabOff)).setY(0);
+  } else if (touches.size === 2 && pinch0) {
+    const [a, b] = pts();
+    userScale = THREE.MathUtils.clamp(pinch0.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch0.d, 0.5, 2);
+    dish.scale.setScalar(userScale);
+    dish.rotation.y = pinch0.r - (Math.atan2(b.y - a.y, b.x - a.x) - pinch0.ang);
+  }
+});
+function up(e) { touches.delete(e.pointerId); if (touches.size < 2) pinch0 = null; if (touches.size === 1) { const [p] = pts(); const t = screenToTable(p.x, p.y); grabOff = t ? dish.position.clone().sub(t) : null; } }
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+
+let hintTimer;
+function hideHint() { clearTimeout(hintTimer); $('hint').style.opacity = 0; }
+$('recenter').onclick = () => { placeInFront(); };
+$('real').onclick = () => { userScale = 1; dish.scale.setScalar(1); };
+$('close').onclick = () => { stop(); };
+
+// ---------- start / stop ----------
+let stream = null, running = false;
+function fail(msg) { const el = $('err'); el.textContent = msg; el.classList.remove('hide'); setTimeout(() => el.classList.add('hide'), 5000); }
+$('go').onclick = async () => {
+  // Both permission prompts must come from this tap.
+  let oriAsk = Promise.resolve('granted');
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    oriAsk = DeviceOrientationEvent.requestPermission().catch(() => 'denied');
+  }
+  loadMsg.textContent = 'Starting the camera…';
+  if (location.hash === '#desk') {            // desktop render check: no camera, wood backdrop
+    document.body.style.background = 'linear-gradient(180deg,#5a3d26,#8a6040 60%,#6d4a30)';
+    $('start').classList.add('hide'); canvas.classList.remove('hide'); $('ui').classList.remove('hide');
+    resize(); running = true; placeInFront(); requestAnimationFrame(loop); return;
+  }
+  let camAsk;
+  try {
+    camAsk = navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  } catch (e) { fail('This browser has no camera access. Try "Open full AR".'); return; }
+  try { stream = await camAsk; } catch (e) { fail('Camera blocked (' + (e.name || e) + '). Allow the camera and try again.'); return; }
+  loadMsg.textContent = 'Camera on';
+  if ((await oriAsk) === 'granted') addEventListener('deviceorientation', onOri);
+  video.srcObject = stream; try { await video.play(); } catch (e) {}
+  $('start').classList.add('hide'); video.classList.remove('hide'); canvas.classList.remove('hide'); $('ui').classList.remove('hide');
+  $('hint').style.opacity = 1; hintTimer = setTimeout(hideHint, 6000);
+  resize(); running = true;
+  setTimeout(() => { placeInFront(); }, 350);        // give the gyro a moment to report
+  requestAnimationFrame(loop);
+};
+// Desktop check only: cam.html#auto starts without a tap (Chrome allows it).
+if (location.hash === "#auto" || location.hash === "#desk") setTimeout(() => $("go").onclick(), 1500);
+function stop() {
+  running = false; removeEventListener('deviceorientation', onOri); haveOri = false;
+  if (stream) stream.getTracks().forEach(t => t.stop()); stream = null;
+  video.classList.add('hide'); canvas.classList.add('hide'); $('ui').classList.add('hide'); $('start').classList.remove('hide');
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && running) stop(); });
+
+function loop() {
+  if (!running) return;
+  if (gyro) cam.quaternion.slerp(qTarget, 0.35);
+  renderer.render(scene, cam);
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
