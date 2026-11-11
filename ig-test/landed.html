@@ -7,6 +7,6 @@
 <script>(function(){var u=navigator.userAgent,w=/Instagram/i.test(u)?"Instagram in-app browser":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(u)?"Facebook in-app browser":/CriOS/.test(u)?"Chrome":/iPhone|iPad/.test(u)?"Safari":/Android/.test(u)?"Android browser":"Desktop browser";document.getElementById("env").textContent="You are in: "+w;window.__where=w})()</script>
 <script>var t=new URLSearchParams(location.search).get("t")||"?",out=!/Instagram|FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(navigator.userAgent);
 document.getElementById("ok").textContent=out?"✅":"❌";
-document.getElementById("h").textContent="Test "+t+(out?" WORKED: you're outside Instagram":" did NOT leave the app");
-document.getElementById("p").textContent=out?"Write down: \""+t+": works\" and how many taps it took. Then go back to Instagram for the next test.":"The link opened, but still inside the app.";</script>
+document.getElementById("h").textContent="Test "+t+(out?" WORKED: you're outside the app":" did NOT leave the app");
+document.getElementById("p").textContent=out?"Write down: \""+t+": works\" and how many taps it took. Then go back to the app for the next test.":"The link opened, but still inside the app.";</script>
 </body></html>
